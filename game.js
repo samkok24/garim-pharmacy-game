@@ -97,6 +97,7 @@ const DEFAULT_STATE = () => ({
   patientsServed: 0,
   bestCombo: 0,
   ach: [],           // 달성한 업적 id
+  tutorialDone: false,
   lastSave: Date.now(),
   pendingEvent: null,
   promo: {
@@ -327,6 +328,7 @@ function tapPatient(item) {
   bumpCombo();
   const comboMul = 1 + Math.min(combo, 20) * 0.05;
   servePatient(item, M.tapMul * comboMul, null);
+  if (TUT.active && TUT_STEPS[TUT.step]?.action === "tap") setTimeout(tutAdvance, 400);
 }
 
 /* 자동 조제 */
@@ -908,6 +910,8 @@ function maybeShowFirstEpisodePromo() {
   if (S.promo.firstEpisodePrompted || S.promo.firstEpisodeRewardClaimed) return;
   if (S.clearedEvents.length < 1 && S.patientsServed < 8) return;
   if (isModalOpen()) return;
+  if (typeof TUT !== "undefined" && TUT.active) return;            // 튜토리얼 중에는 띄우지 않음
+  if (!$("#prologue").hidden) return;                              // 프롤로그 중에도 띄우지 않음
   showFirstEpisodePromo(false);
 }
 
@@ -1201,6 +1205,7 @@ function renderEtc() {
       <div class="settings-row"><span>📜 해결한 사건</span><b class="jua">${S.clearedEvents.length} / ${DATA.events.length}</b></div>
       <div class="settings-row"><span>✨ 풀어낸 수수께끼</span><b class="jua">${S.solvedCases.length} / ${DATA.specialCases.length}</b></div>
       <div class="settings-row"><span>📖 원작 1화 확인</span><b class="jua origin-read-state">${originalReadStateText()}</b></div>
+      <div class="settings-row"><span>🎬 프롤로그 다시 보기</span><button class="mini-btn" id="replayPrologue">재생</button></div>
       <div class="settings-row" style="border-bottom:none;">
         <span>💾 저장 데이터</span>
         <button class="mini-btn danger" id="resetBtn">초기화</button>
@@ -1210,6 +1215,7 @@ function renderEtc() {
       <div class="cm-t">🩺 운영 목표</div>
       <div class="cm-d">환자를 빠르게 처리해 명성을 올리고, 터지는 사건마다 증거를 읽어 약국의 운명을 바꾸세요.</div>
     </div>`;
+  $("#replayPrologue").addEventListener("click", () => showPrologue(false));
   $("#resetBtn").addEventListener("click", () => {
     const m = $("#genericModal");
     m.innerHTML = `
@@ -1319,26 +1325,160 @@ function offlineReward() {
 let pendingFirstVisitIntro = false;
 let pendingOfflineReward = false;
 
+/* ---------- 비주얼 노벨 프롤로그 ---------- */
+const PROLOGUE_SCENES = [
+  { bg: "vn-glory", art: `<div class="vn-art">🏆</div>`, spk: "2024년, 서울",
+    text: "2년 연속 모범약국 선정.\n임가민의 약국은 이 동네에서 가장 믿음직한 곳이었다." },
+  { bg: "vn-fall", art: `<div class="vn-art">🥀</div>`, spk: "그날",
+    text: "하지만 누군가 조작한 약화사고 하나로—\n환자도, 약국도, 명예도. 전부 잃었다." },
+  { bg: "vn-aurora", art: `<div class="vn-art" style="font-size:3.2rem; margin-top:30%;">🌌</div>`, spk: "오로라가 뜬 밤",
+    text: "폐업 신고를 마친 그 밤,\n하늘에는 21년 만의 오로라가 떠올랐다." },
+  { bg: "vn-rx", art: `<div class="vn-rx-paper"><div class="rx-t">처 방 전</div><div class="rx-m">【여기까지 왔어.\n이제 어떻게 하면 되는 거지?】</div></div>`, spk: "삐— 드르륵—",
+    text: "분명 꺼져 있어야 할 프린터에서\n의문의 처방전 한 장이 출력됐다." },
+  { bg: "vn-2001", art: `<div class="vn-cal"><div class="c-top">JULY · 화요일</div><div class="c-date">2001. 7. 24</div></div>`, spk: "눈을 떠 보니",
+    text: "23년 전, 신입 약사 시절의 가림약국.\n— 회귀했다." },
+  { bg: "vn-holo", art: `<div class="vn-holo-cards"><div class="hc hc1"></div><div class="hc hc2"></div><div class="hc hc3"></div></div>`, spk: "그리고, 능력",
+    text: "처방전을 만지는 순간, 환자의 모든 약력이 눈앞에 펼쳐진다.\n이 시대에는 존재할 수 없는 힘." },
+  { bg: "vn-vow", art: `<div class="vn-gamin">${CHARS.gamin()}</div>`, spk: "임가민",
+    text: "“두 번째 인생, 이번엔 잃지 않아.\n동네 약사도 2회차면— 동네 화타가 된다.”", last: true },
+];
+
+const VN = { idx: 0, typing: false, typeTimer: null, withTutorial: false };
+
+function vnRenderScene() {
+  const sc = PROLOGUE_SCENES[VN.idx];
+  const stage = $("#vnStage");
+  stage.className = "";
+  stage.classList.add(sc.bg);
+  stage.innerHTML = sc.art;
+  $("#vnSpk").textContent = sc.spk;
+  $("#vnNext").style.display = "none";
+  // 타이핑 연출
+  const txtEl = $("#vnText");
+  txtEl.innerHTML = "";
+  VN.typing = true;
+  let i = 0;
+  const full = sc.text;
+  clearInterval(VN.typeTimer);
+  VN.typeTimer = setInterval(() => {
+    i++;
+    txtEl.innerHTML = full.slice(0, i).replace(/\n/g, "<br>") + `<span class="vn-cursor">▎</span>`;
+    if (i >= full.length) vnFinishTyping();
+  }, 34);
+}
+
+function vnFinishTyping() {
+  const sc = PROLOGUE_SCENES[VN.idx];
+  clearInterval(VN.typeTimer);
+  VN.typing = false;
+  $("#vnText").innerHTML = sc.text.replace(/\n/g, "<br>");
+  if (sc.last) {
+    const btn = document.createElement("button");
+    btn.className = "vn-start-btn";
+    btn.textContent = "💊 가림약국 시작하기";
+    btn.addEventListener("click", e => { e.stopPropagation(); endPrologue(); });
+    $("#vnText").appendChild(btn);
+  } else {
+    $("#vnNext").style.display = "block";
+  }
+}
+
+function vnTap() {
+  if (VN.typing) { vnFinishTyping(); return; }
+  if (PROLOGUE_SCENES[VN.idx].last) return; // 마지막 장면은 버튼으로만
+  VN.idx++;
+  vnRenderScene();
+}
+
+function showPrologue(withTutorial) {
+  VN.idx = 0;
+  VN.withTutorial = !!withTutorial;
+  $("#prologue").hidden = false;
+  vnRenderScene();
+}
+
+function endPrologue() {
+  clearInterval(VN.typeTimer);
+  $("#prologue").hidden = true;
+  if (VN.withTutorial && !S.tutorialDone) startTutorial();
+}
+
+$("#prologue").addEventListener("pointerdown", e => {
+  if (e.target.id === "prologueSkip") return;
+  vnTap();
+});
+$("#prologueSkip").addEventListener("click", endPrologue);
+
+/* ---------- 스포트라이트 튜토리얼 ---------- */
+const TUT_STEPS = [
+  { target: "#queue", action: "tap", title: "🖐️ 환자를 탭하세요!",
+    text: "줄 선 환자를 탭하면 즉시 조제!\n가만히 둬도 자동 조제되지만, 직접 탭하면 💰골드와 ⭐명성을 훨씬 많이 받아요.\n지금 한 분 조제해보세요!" },
+  { target: '.nav-btn[data-tab="upgrade"]', title: "🛠️ 골드 → 업그레이드",
+    text: "번 골드로 조제 실력·속도를 올리면\n가만히 있어도 약국이 더 많이 법니다.\n탭에 🔴빨간 점이 뜨면 \"지금 살 수 있다\"는 신호!" },
+  { target: "#goalStrip", title: "⭐ 명성 → 사건 해결",
+    text: "이 게이지가 다음 목표예요.\n명성이 차면 🚨원작의 사건이 열리고,\n해결하면 성장 수치 + 사건 기록 카드 + 원작 무료 회차 링크까지 얻어요." },
+  { target: "#scene", title: "✨ 수상한 손님 & 🔥 콤보",
+    text: "가끔 반짝이는 손님이 찾아와요 — 탭하면 홀로그램 처방전 퀴즈, 맞히면 큰 보상!\n그리고 연속 탭 15콤보를 채우면 ⚡피버타임(골드 x2 + 환자 러시)!" },
+  { title: "💊 준비 끝!",
+    text: "약국은 자리를 비워도 알아서 돌아가고,\n돌아오면 그동안 번 골드를 정산해드려요.\n\n자, 이제 가림약국을 부탁해요!", last: true },
+];
+
+const TUT = { active: false, step: 0 };
+
+function tutRender() {
+  const st = TUT_STEPS[TUT.step];
+  document.querySelectorAll(".tut-spotlight").forEach(el => el.classList.remove("tut-spotlight"));
+  const bubble = $("#tutBubble");
+  bubble.hidden = false;
+  bubble.querySelector(".tut-title").textContent = st.title;
+  bubble.querySelector(".tut-text").textContent = st.text;
+  bubble.querySelector(".tut-dots").textContent =
+    TUT_STEPS.map((_, i) => i === TUT.step ? "●" : "○").join(" ");
+  $("#tutNextBtn").textContent = st.last ? "시작!" : "다음";
+  const app = $("#app").getBoundingClientRect();
+  let topPx = app.height * 0.4; // 기본: 중앙
+  if (st.target) {
+    const el = document.querySelector(st.target);
+    if (el) {
+      el.classList.add("tut-spotlight");
+      const r = el.getBoundingClientRect();
+      const center = r.top - app.top + r.height / 2;
+      // 대상이 화면 위쪽이면 말풍선은 아래, 아래쪽이면 위
+      topPx = center < app.height * 0.5
+        ? Math.min(r.bottom - app.top + 14, app.height - 220)
+        : Math.max(r.top - app.top - 196, 12);
+    }
+  }
+  bubble.style.top = topPx + "px";
+}
+
+function tutAdvance() {
+  if (!TUT.active) return;
+  if (TUT.step >= TUT_STEPS.length - 1) { endTutorial(); return; }
+  TUT.step++;
+  tutRender();
+}
+
+function startTutorial() {
+  TUT.active = true;
+  TUT.step = 0;
+  tutRender();
+}
+
+function endTutorial() {
+  TUT.active = false;
+  document.querySelectorAll(".tut-spotlight").forEach(el => el.classList.remove("tut-spotlight"));
+  $("#tutBubble").hidden = true;
+  S.tutorialDone = true;
+  save();
+  gaminSay("자, 영업 시작이다!");
+  toast("💊 튜토리얼 완료! 가림약국을 부탁해요");
+}
+
+$("#tutNextBtn").addEventListener("click", tutAdvance);
+
 function showFirstVisitIntro() {
-  const m = $("#genericModal");
-  m.innerHTML = `
-    <div class="rx-head">
-      <span class="ep-tag">🌌 프롤로그</span>
-      <div style="width:92px; margin:2px auto 0;">${CHARS.gamin()}</div>
-      <h2>가림약국 키우기</h2>
-      <div class="rx-no">— 회귀약사 임가민의 사건 수첩 —</div>
-    </div>
-    <div class="scene-txt" style="text-align:center; line-height:1.9;">
-      2024년의 베테랑 약사 임가민,<br>
-      조작된 사고로 모든 걸 잃고<br>
-      <b>2001년의 신입 약사로 회귀했다!</b><br><br>
-      🖐️ 환자를 <b>탭</b>하면 직접 조제 (보너스!)<br>
-      ⏳ 가만히 둬도 <b>자동 조제</b><br>
-      ⭐ 명성을 모아 <b>긴급 사건</b>을 해결하세요<br>
-      ✨ 반짝이는 환자는 <b>홀로그램 처방전</b>의 기회!
-    </div>
-    <button class="modal-btn" onclick="document.querySelector('#genericBack').classList.remove('show')">💊 약국 오픈!</button>`;
-  $("#genericBack").classList.add("show");
+  showPrologue(true);
 }
 
 function enterGameFromStart() {
