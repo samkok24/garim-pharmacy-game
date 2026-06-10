@@ -61,7 +61,134 @@ body {
   overflow: hidden;
 }
 
+.start-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 26px;
+  text-align: center;
+  background:
+    linear-gradient(180deg, #a8e3d5 0 48%, #e8d6b5 48% 100%);
+}
+.start-screen.hide { display: none; }
+.start-cast {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  width: 238px;
+  height: 112px;
+}
+.start-cast .pixel-sprite {
+  width: 82px;
+  height: 92px;
+}
+.start-cast .pixel-sprite.hero {
+  width: 96px;
+  height: 108px;
+  margin: 0 -8px;
+  filter: drop-shadow(0 5px 0 rgba(74,63,53,.18));
+}
+.pixel-title {
+  font-family: 'Jua', sans-serif;
+  color: var(--mint-dark);
+  line-height: 1.02;
+  text-shadow:
+    3px 0 0 #fff,
+    0 3px 0 #fff,
+    3px 3px 0 #fff8d9,
+    5px 5px 0 rgba(74,63,53,.18);
+}
+.pixel-title span {
+  display: block;
+  font-size: 1.55rem;
+}
+.pixel-title strong {
+  display: block;
+  font-size: 2.05rem;
+  font-weight: 400;
+  color: var(--peach-deep);
+}
+.start-subtitle {
+  font-family: 'Jua', sans-serif;
+  font-size: .95rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 3px solid var(--mint-deep);
+  padding: 6px 14px;
+  box-shadow: 0 4px 0 rgba(46,138,120,.28);
+}
+.start-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  width: min(260px, 100%);
+  margin-top: 4px;
+}
+.start-btn {
+  min-height: 44px;
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  border: 3px solid var(--mint-dark);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 4px 0 rgba(74,63,53,.22);
+  cursor: pointer;
+}
+.start-btn.primary {
+  background: var(--gold);
+  border-color: var(--gold-deep);
+  color: #6a4314;
+}
+.start-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(74,63,53,.22);
+}
+.start-btn:disabled {
+  background: #eadfcb;
+  border-color: #cdbf9f;
+  color: #9a8c74;
+  cursor: default;
+  transform: none;
+  box-shadow: 0 4px 0 rgba(74,63,53,.12);
+}
+
 h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
+
+.pixel-sprite {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-image: url("assets/characters-pixel.png");
+  background-repeat: no-repeat;
+  background-size: 500% 400%;
+  image-rendering: auto;
+}
+.sprite-gamin { background-position: 0% 0%; }
+.sprite-miso { background-position: 25% 0%; }
+.sprite-junghwa { background-position: 50% 0%; }
+.sprite-ari { background-position: 75% 0%; }
+.sprite-yesol { background-position: 100% 0%; }
+.sprite-hyunil { background-position: 0% 33.333%; }
+.sprite-sujin { background-position: 25% 33.333%; }
+.sprite-mystery { background-position: 50% 33.333%; }
+.sprite-grandma { background-position: 75% 33.333%; }
+.sprite-grandpa { background-position: 100% 33.333%; }
+.sprite-office { background-position: 0% 66.667%; }
+.sprite-woman { background-position: 25% 66.667%; }
+.sprite-kid { background-position: 50% 66.667%; }
+.sprite-worker { background-position: 75% 66.667%; }
+.sprite-student { background-position: 100% 66.667%; }
+.sprite-pregnant { background-position: 0% 100%; }
+.sprite-rude { background-position: 25% 100%; }
+.sprite-vendor { background-position: 50% 100%; }
+.sprite-rush { background-position: 75% 100%; }
+.sprite-gift { background-position: 100% 100%; }
 
 /* ---------- 상단 자원 바 ---------- */
 #topbar {
@@ -294,7 +421,14 @@ h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
 }
 
 /* 환자 줄 */
-.patient svg, #gamin svg { width: 100%; height: 100%; display: block; }
+.patient svg,
+.patient .pixel-sprite,
+#gamin svg,
+#gamin .pixel-sprite {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 #queue {
   position: absolute;
   bottom: 8px; left: 0; right: 0;
@@ -411,6 +545,10 @@ h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
   width: 52px;
   height: 52px;
   filter: drop-shadow(0 2px 0 rgba(74,63,53,.16));
+}
+.staff-cameo .staff-face .pixel-sprite {
+  width: 100%;
+  height: 100%;
 }
 .staff-cameo .staff-speech {
   position: absolute;
@@ -954,6 +1092,20 @@ h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
   border-radius: 12px;
   padding: 10px;
 }
+.promo-read-state {
+  margin-top: 8px;
+  padding: 7px 9px;
+  border: 1.5px solid #e3cfae;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-family: 'Jua', sans-serif;
+  font-size: .68rem;
+}
+.promo-read-state.checked {
+  border-color: var(--mint-deep);
+  background: #eafaf5;
+  color: var(--mint-dark);
+}
 .promo-links {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -1006,6 +1158,32 @@ h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
 .promo-reward span {
   font-size: .64rem;
   color: var(--ink-soft);
+}
+
+.origin-check-badge {
+  position: absolute;
+  top: 118px;
+  right: 9px;
+  z-index: 7;
+  max-width: 136px;
+  border: 2px solid var(--mint-deep);
+  background: var(--paper);
+  color: var(--mint-dark);
+  font-family: 'Jua', sans-serif;
+  font-size: .58rem;
+  line-height: 1.15;
+  padding: 5px 7px;
+  border-radius: 10px;
+  box-shadow: 0 3px 0 rgba(46,138,120,.2);
+  cursor: pointer;
+}
+.origin-check-badge.pending {
+  border-color: #d9b879;
+  color: #9b6b2b;
+  background: #fff7dd;
+}
+.origin-check-badge.checked {
+  background: #eafaf5;
 }
 
 /* 특수환자 모달 */

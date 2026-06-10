@@ -27,6 +27,9 @@ const CHARS = (() => {
   const wrap = (inner, w = 64, h = 64) =>
     `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
 
+  const sprite = (id, label) =>
+    `<span class="pixel-sprite sprite-${id}" role="img" aria-label="${label}"></span>`;
+
   /* ---------- 주인공: 임가민 (표지 캐주얼화) ---------- */
   function gamin() {
     return wrap(`
@@ -300,20 +303,38 @@ const CHARS = (() => {
     }),
   };
 
+  const staffLabels = {
+    miso: "이미소",
+    junghwa: "김정화",
+    ari: "홍아리",
+    yesol: "고예솔",
+    hyunil: "박현일",
+    sujin: "배수진",
+  };
+
   function staff(id) {
-    return (STAFF[id] || STAFF.miso)();
+    return sprite(staffLabels[id] ? id : "miso", staffLabels[id] || "이미소");
   }
 
   const customers = [
-    { svg: grandma,  talks: ["허리가 쑤셔서 왔어요", "임 약사 있는가?", "여기 약이 잘 들어", "우리 영감 약도 부탁해요"] },
-    { svg: grandpa,  talks: ["혈압약 타러 왔습니다", "임 약사가 설명을 잘해줘", "콜록콜록…", "글씨가 안 보여서…"] },
-    { svg: office,   talks: ["점심시간이라 바빠요!", "소화제 주세요", "야근했더니 머리가…", "처방전이요"] },
-    { svg: woman,    talks: ["감기 기운이 있어서요", "여기가 그 유명한 약국?", "비타민도 하나 주세요", "애가 열이 나요"] },
-    { svg: kid,      talks: ["딸기맛 비타민 주세요!", "주사 안 맞을래요…", "엄마가 가래요", "사탕도 있어요?"] },
-    { svg: worker,   talks: ["어깨가 저릿저릿해요", "파스 큰 걸로요", "현장에서 바로 왔어요", "근육통 약이요"] },
-    { svg: student,  talks: ["시험기간이라 죽겠어요", "카페인 너무 마셨나…", "눈이 침침해요", "졸음 안 오는 약 있어요?"] },
-    { svg: pregnant, talks: ["임산부도 먹을 수 있나요?", "철분제 주세요", "입덧이 심해서요", "조심해서 지어주세요"] },
+    { svg: () => sprite("grandma", "꽃무늬 할머니"), talks: ["허리가 쑤셔서 왔어요", "임 약사 있는가?", "여기 약이 잘 들어", "우리 영감 약도 부탁해요"] },
+    { svg: () => sprite("grandpa", "중절모 할아버지"), talks: ["혈압약 타러 왔습니다", "임 약사가 설명을 잘해줘", "콜록콜록…", "글씨가 안 보여서…"] },
+    { svg: () => sprite("office", "회사원 고객"), talks: ["점심시간이라 바빠요!", "소화제 주세요", "야근했더니 머리가…", "처방전이요"] },
+    { svg: () => sprite("woman", "긴머리 여성 고객"), talks: ["감기 기운이 있어서요", "여기가 그 유명한 약국?", "비타민도 하나 주세요", "애가 열이 나요"] },
+    { svg: () => sprite("kid", "유치원 아이"), talks: ["딸기맛 비타민 주세요!", "주사 안 맞을래요…", "엄마가 가래요", "사탕도 있어요?"] },
+    { svg: () => sprite("worker", "공사장 고객"), talks: ["어깨가 저릿저릿해요", "파스 큰 걸로요", "현장에서 바로 왔어요", "근육통 약이요"] },
+    { svg: () => sprite("student", "교복 학생"), talks: ["시험기간이라 죽겠어요", "카페인 너무 마셨나…", "눈이 침침해요", "졸음 안 오는 약 있어요?"] },
+    { svg: () => sprite("pregnant", "임산부 고객"), talks: ["임산부도 먹을 수 있나요?", "철분제 주세요", "입덧이 심해서요", "조심해서 지어주세요"] },
+    { svg: () => sprite("rude", "진상 고객"), talks: ["왜 이렇게 오래 걸려요?", "책임자 불러요", "이 약 맞는 거예요?", "환불 안 돼요?"] },
+    { svg: () => sprite("vendor", "약품 업자"), talks: ["납품 확인 부탁드립니다", "신규 거래 조건이요", "샘플 두고 갈게요", "수량이 하나 비는데요?"] },
+    { svg: () => sprite("rush", "몰려든 고객"), talks: ["빨리 부탁드려요!", "대기 몇 명이에요?", "버스 시간이 다 됐어요", "처방전 먼저 냈어요"] },
+    { svg: () => sprite("gift", "감사한 고객"), talks: ["고마워서 가져왔어요", "덕분에 나았어요", "이거 직원분들이랑 드세요", "또 올게요"] },
   ];
 
-  return { gamin, mystery, staff, customers };
+  return {
+    gamin: () => sprite("gamin", "임가민"),
+    mystery: () => sprite("mystery", "수상한 특수 고객"),
+    staff,
+    customers,
+  };
 })();

@@ -102,6 +102,7 @@ const DEFAULT_STATE = () => ({
     firstEpisodeClicked: false,
     firstEpisodeRewardClaimed: false,
     firstEpisodeClickedAt: 0,
+    firstEpisodeCheckedAt: 0,
   },
 });
 
@@ -706,12 +707,42 @@ function isModalOpen() {
     || specialBack.classList.contains("show");
 }
 
+function originalReadStateText() {
+  if (S.promo?.firstEpisodeRewardClaimed) return "완료";
+  if (S.promo?.firstEpisodeClicked) return "확인 중";
+  return "미확인";
+}
+
+function renderOriginCheckBadge() {
+  const scene = $("#scene");
+  if (!scene || !S.promo) return;
+  const active = S.promo.firstEpisodeClicked || S.promo.firstEpisodeRewardClaimed;
+  let badge = $("#originCheckBadge");
+  if (!active) {
+    if (badge) badge.remove();
+    return;
+  }
+  if (!badge) {
+    badge = document.createElement("button");
+    badge.id = "originCheckBadge";
+    badge.type = "button";
+    badge.addEventListener("pointerdown", e => e.stopPropagation());
+    badge.addEventListener("click", () => showFirstEpisodePromo(true));
+    scene.appendChild(badge);
+  }
+  const done = S.promo.firstEpisodeRewardClaimed;
+  badge.className = `origin-check-badge ${done ? "checked" : "pending"}`;
+  badge.textContent = done ? "✅ 원작 1화 확인 완료" : "📖 원작 확인 중";
+  badge.setAttribute("aria-label", done ? "원작 1화 확인 완료" : "원작 1화 확인 중");
+}
+
 function showFirstEpisodePromo(force = false) {
   if (!S.promo) S.promo = Object.assign(DEFAULT_STATE().promo, {});
   if (!force && (S.promo.firstEpisodePrompted || S.promo.firstEpisodeRewardClaimed)) return false;
 
   S.promo.firstEpisodePrompted = true;
   const canClaim = S.promo.firstEpisodeClicked && !S.promo.firstEpisodeRewardClaimed;
+  const readState = originalReadStateText();
   const m = $("#genericModal");
   m.innerHTML = `
     <div class="promo-modal">
@@ -722,6 +753,9 @@ function showFirstEpisodePromo(force = false) {
       </div>
       <div class="promo-copy">
         사건을 따라가기 전에 원작 1화를 열어보세요. 게임으로 돌아오면 약국 운영에 바로 쓰는 키트를 지급합니다.
+      </div>
+      <div class="promo-read-state ${S.promo.firstEpisodeClicked ? "checked" : ""}" id="promoReadState">
+        ${readState === "완료" ? "✅ 원작 1화 확인 완료" : readState === "확인 중" ? "📖 1화 링크 열림 · 확인 중" : "□ 원작 1화 확인 전"}
       </div>
       <div class="promo-links" aria-label="무료 회차 링크">
         ${ORIGINAL_FREE_EPISODES.map(ep => `
@@ -750,11 +784,18 @@ function showFirstEpisodePromo(force = false) {
   $("#promoEpisodeOne").addEventListener("click", () => {
     S.promo.firstEpisodeClicked = true;
     S.promo.firstEpisodeClickedAt = Date.now();
+    S.promo.firstEpisodeCheckedAt = S.promo.firstEpisodeCheckedAt || S.promo.firstEpisodeClickedAt;
+    const readState = $("#promoReadState");
+    if (readState) {
+      readState.textContent = "📖 1화 링크 열림 · 게임 안에 확인 표시가 남았습니다";
+      readState.classList.add("checked");
+    }
     const claim = $("#claimEpisodeReward");
     if (!S.promo.firstEpisodeRewardClaimed) {
       claim.disabled = false;
       claim.textContent = "🎁 보고 왔어요 — 키트 받기";
     }
+    renderOriginCheckBadge();
     save();
   });
 
@@ -770,6 +811,7 @@ function showFirstEpisodePromo(force = false) {
     S.tech += 1;
     addRep(repReward);
     S.promo.firstEpisodeRewardClaimed = true;
+    S.promo.firstEpisodeCheckedAt = S.promo.firstEpisodeCheckedAt || Date.now();
     $("#genericBack").classList.remove("show");
     recalcMods();
     updateHUD();
@@ -803,6 +845,7 @@ function updateHUD() {
   const ev = nextEvent();
   $("#repLbl").textContent = ev ? `명성 (다음 사건 ${fmt(ev.rep)})` : "명성 (완결!)";
   if (S.lifetimeRep >= AURORA_REQ * 0.7) $("#scene").classList.add("aurora-on");
+  renderOriginCheckBadge();
   // 패널 버튼 갱신 (비용 도달 알림)
   refreshAfford();
   maybeShowFirstEpisodePromo();
@@ -961,6 +1004,7 @@ function renderEtc() {
       <div class="settings-row"><span>🌌 회귀 횟수</span><b class="jua">${S.regressions}회</b></div>
       <div class="settings-row"><span>📜 해결한 사건</span><b class="jua">${S.clearedEvents.length} / ${DATA.events.length}</b></div>
       <div class="settings-row"><span>✨ 풀어낸 수수께끼</span><b class="jua">${S.solvedCases.length} / ${DATA.specialCases.length}</b></div>
+      <div class="settings-row"><span>📖 원작 1화 확인</span><b class="jua origin-read-state">${originalReadStateText()}</b></div>
       <div class="settings-row" style="border-bottom:none;">
         <span>💾 저장 데이터</span>
         <button class="mini-btn danger" id="resetBtn">초기화</button>
@@ -1075,6 +1119,89 @@ function offlineReward() {
   $("#genericBack").classList.add("show");
 }
 
+/* ---------- 첫 화면 ---------- */
+let pendingFirstVisitIntro = false;
+let pendingOfflineReward = false;
+
+function showFirstVisitIntro() {
+  const m = $("#genericModal");
+  m.innerHTML = `
+    <div class="rx-head">
+      <span class="ep-tag">🌌 프롤로그</span>
+      <div style="width:92px; margin:2px auto 0;">${CHARS.gamin()}</div>
+      <h2>가림약국 키우기</h2>
+      <div class="rx-no">— 회귀약사 임가민의 사건 수첩 —</div>
+    </div>
+    <div class="scene-txt" style="text-align:center; line-height:1.9;">
+      2024년의 베테랑 약사 임가민,<br>
+      조작된 사고로 모든 걸 잃고<br>
+      <b>2001년의 신입 약사로 회귀했다!</b><br><br>
+      🖐️ 환자를 <b>탭</b>하면 직접 조제 (보너스!)<br>
+      ⏳ 가만히 둬도 <b>자동 조제</b><br>
+      ⭐ 명성을 모아 <b>긴급 사건</b>을 해결하세요<br>
+      ✨ 반짝이는 환자는 <b>홀로그램 처방전</b>의 기회!
+    </div>
+    <button class="modal-btn" onclick="document.querySelector('#genericBack').classList.remove('show')">💊 약국 오픈!</button>`;
+  $("#genericBack").classList.add("show");
+}
+
+function enterGameFromStart() {
+  const start = $("#startScreen");
+  if (start) start.classList.add("hide");
+  if (pendingOfflineReward) {
+    pendingOfflineReward = false;
+    offlineReward();
+  }
+  if (pendingFirstVisitIntro) {
+    pendingFirstVisitIntro = false;
+    setTimeout(showFirstVisitIntro, 180);
+  }
+}
+
+function fallbackCopy(text) {
+  const area = document.createElement("textarea");
+  area.value = text;
+  area.setAttribute("readonly", "");
+  area.style.position = "absolute";
+  area.style.left = "-9999px";
+  document.body.appendChild(area);
+  area.select();
+  const copied = document.execCommand("copy");
+  area.remove();
+  return copied;
+}
+
+async function shareGame() {
+  const url = location.href.split("#")[0];
+  const title = "다 해먹는 2회차 동네약사";
+  const text = "가림약국 키우기 바로 플레이";
+  try {
+    if (navigator.share) {
+      await navigator.share({ title, text, url });
+      return;
+    }
+    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(url);
+    else if (!fallbackCopy(url)) throw new Error("copy failed");
+    toast("공유 링크를 복사했습니다");
+  } catch (e) {
+    toast("공유가 취소됐거나 복사 권한이 없어요");
+  }
+}
+
+function setupStartScreen(loaded) {
+  const start = $("#startScreen");
+  if (!start) {
+    enterGameFromStart();
+    return;
+  }
+  const continueBtn = $("#continueGameBtn");
+  continueBtn.disabled = !loaded;
+  continueBtn.title = loaded ? "저장된 약국으로 이어하기" : "아직 저장된 약국이 없습니다";
+  $("#startGameBtn").addEventListener("click", enterGameFromStart);
+  continueBtn.addEventListener("click", enterGameFromStart);
+  $("#shareGameBtn").addEventListener("click", shareGame);
+}
+
 /* ---------- 메인 루프 ---------- */
 let lastSpawn = 0;
 let lastSpecial = Date.now();
@@ -1102,37 +1229,17 @@ document.addEventListener("visibilitychange", () => { if (document.hidden) save(
 function init() {
   $("#gamin").innerHTML = CHARS.gamin();
   const loaded = load();
+  pendingFirstVisitIntro = !loaded;
+  pendingOfflineReward = loaded;
   recalcMods();
   updateHUD();
   renderPanel();
   checkEventUnlock();
   checkAuroraUnlock();
+  setupStartScreen(loaded);
   if (loaded) {
-    offlineReward();
     gaminSay("다시 오셨군요. 가림약국에 어서 오세요!");
   } else {
-    // 첫 방문 — 인트로
-    setTimeout(() => {
-      const m = $("#genericModal");
-      m.innerHTML = `
-        <div class="rx-head">
-          <span class="ep-tag">🌌 프롤로그</span>
-          <div style="width:92px; margin:2px auto 0;">${CHARS.gamin()}</div>
-          <h2>가림약국 키우기</h2>
-          <div class="rx-no">— 회귀약사 임가민의 사건 수첩 —</div>
-        </div>
-        <div class="scene-txt" style="text-align:center; line-height:1.9;">
-          2024년의 베테랑 약사 임가민,<br>
-          조작된 사고로 모든 걸 잃고<br>
-          <b>2001년의 신입 약사로 회귀했다!</b><br><br>
-          🖐️ 환자를 <b>탭</b>하면 직접 조제 (보너스!)<br>
-          ⏳ 가만히 둬도 <b>자동 조제</b><br>
-          ⭐ 명성을 모아 <b>긴급 사건</b>을 해결하세요<br>
-          ✨ 반짝이는 환자는 <b>홀로그램 처방전</b>의 기회!
-        </div>
-        <button class="modal-btn" onclick="document.querySelector('#genericBack').classList.remove('show')">💊 약국 오픈!</button>`;
-      $("#genericBack").classList.add("show");
-    }, 400);
     gaminSay("여기가… 2001년의 가림약국?");
   }
   spawnPatient(false);
