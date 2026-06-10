@@ -95,6 +95,8 @@ const DEFAULT_STATE = () => ({
   cards: [],         // event id (카드 = 이벤트 카드)
   solvedCases: [],   // special case index
   patientsServed: 0,
+  bestCombo: 0,
+  ach: [],           // 달성한 업적 id
   lastSave: Date.now(),
   pendingEvent: null,
   promo: {
@@ -262,7 +264,7 @@ function servePatient(item, mul, label) {
   const appRect = $("#app").getBoundingClientRect();
   const x = rect.left - appRect.left + rect.width / 2;
   const y = rect.top - appRect.top;
-  const g = goldPerPatient() * mul;
+  const g = goldPerPatient() * mul * (isFever() ? 2 : 1);
   const r = repPerPatient() * mul;
   S.gold += g;
   addRep(r);
@@ -275,9 +277,56 @@ function servePatient(item, mul, label) {
   updateHUD();
 }
 
+/* ---------- 탭 콤보 & 피버 타임 ---------- */
+let combo = 0, comboResetTimer = null, feverUntil = 0;
+const FEVER_AT = 15, FEVER_MS = 8000, COMBO_WINDOW = 2500;
+
+function isFever() { return Date.now() < feverUntil; }
+
+function comboUI() {
+  const box = $("#comboBox");
+  if (isFever()) {
+    const left = Math.ceil((feverUntil - Date.now()) / 1000);
+    box.textContent = `⚡ 피버타임! ${left}s · 골드 x2`;
+    box.classList.add("show", "fever");
+  } else if (combo >= 2) {
+    box.textContent = `🔥 콤보 x${combo} (+${Math.min(combo, 20) * 5}%)`;
+    box.classList.add("show");
+    box.classList.remove("fever");
+  } else {
+    box.classList.remove("show", "fever");
+  }
+}
+
+function bumpCombo() {
+  combo++;
+  if (combo > S.bestCombo) S.bestCombo = combo;
+  clearTimeout(comboResetTimer);
+  comboResetTimer = setTimeout(() => { combo = 0; comboUI(); }, COMBO_WINDOW);
+  if (combo === FEVER_AT && !isFever()) startFever();
+  comboUI();
+}
+
+function startFever() {
+  feverUntil = Date.now() + FEVER_MS;
+  $("#scene").classList.add("fever");
+  gaminSay("손이 풀렸다! 전부 맡겨!");
+  toast("⚡ 피버타임! 8초간 골드 x2 + 환자 러시!");
+}
+
+function tickFever() {
+  if (!isFever() && $("#scene").classList.contains("fever")) {
+    $("#scene").classList.remove("fever");
+    combo = 0;
+  }
+  comboUI();
+}
+
 function tapPatient(item) {
   if (item.isSpecial) { openSpecialCase(item); return; }
-  servePatient(item, M.tapMul, null);
+  bumpCombo();
+  const comboMul = 1 + Math.min(combo, 20) * 0.05;
+  servePatient(item, M.tapMul * comboMul, null);
 }
 
 /* 자동 조제 */
@@ -369,6 +418,23 @@ $("#eventBanner").addEventListener("pointerdown", e => {
   e.stopPropagation();
   if (S.pendingEvent) openStory(DATA.events.find(ev => ev.id === S.pendingEvent));
 });
+
+/* ---------- 원작 회차 링크 ---------- */
+const NOVEL_PRODUCT_URL = "https://www.likenovel.net/product/1102";
+function epStartNo(ev) {
+  const m = ev.ep.match(/(\d+)/);
+  return m ? +m[1] : 1;
+}
+function originUrlFor(ev) {
+  const no = epStartNo(ev);
+  const free = ORIGINAL_FREE_EPISODES.find(e => e.no === no);
+  return free ? free.url : NOVEL_PRODUCT_URL;
+}
+function originReadBtnHtml(ev) {
+  const no = epStartNo(ev);
+  const freeTag = no <= 25 ? " · 무료" : "";
+  return `<a class="modal-btn origin-read" href="${originUrlFor(ev)}" target="_blank" rel="noopener">📖 이 사건의 원작 읽기 (${ev.ep.replace("원작 ", "")}${freeTag})</a>`;
+}
 
 /* ---------- 스토리 모달 ---------- */
 const storyBack = $("#storyBack");
@@ -467,7 +533,8 @@ function renderStory() {
         <div class="cg-desc">${ev.card.desc}</div>
         <span class="cg-ep">${caseLabel(ev)} · 해결 완료</span>
       </div>
-      <button class="modal-btn" id="storyDone">약국으로 돌아가기</button>`;
+      ${originReadBtnHtml(ev)}
+      <button class="modal-btn sub" id="storyDone">약국으로 돌아가기</button>`;
     m.innerHTML = html;
     m.onclick = null;
     $("#storyDone").addEventListener("click", () => {
@@ -689,6 +756,8 @@ function doRegress() {
   S.staff = {};
   S.pendingEvent = null;
   queue.slice().forEach(removePatient);
+  combo = 0; feverUntil = 0;
+  $("#scene").classList.remove("fever");
   brewing = false;
   $("#gamin").classList.remove("working");
   $("#brewBarWrap").classList.remove("show");
@@ -842,6 +911,110 @@ function maybeShowFirstEpisodePromo() {
   showFirstEpisodePromo(false);
 }
 
+/* ---------- 다음 목표 스트립 & 행동 힌트 ---------- */
+function anyAffordable(list, isStaff) {
+  for (const it of list) {
+    const lv = (isStaff ? S.staff : S.upgrades)[it.id] || 0;
+    if (!isStaff && lv >= it.max) continue;
+    if (isStaff && lv === 0 && S.rep < it.unlockRep) continue;
+    const cost = Math.floor(it.baseCost * Math.pow(it.costMul, lv));
+    if (S.gold >= cost) return it;
+  }
+  return null;
+}
+function anySkillAffordable() {
+  return DATA.skills.find(sk => S[sk.stat] >= sk.cost(S.skills[sk.id] || 0)) || null;
+}
+
+let hintTarget = null; // 스트립 탭 시 이동할 곳
+function currentHint() {
+  if (S.pendingEvent) { hintTarget = "event"; return "👆 사건을 확인하세요!"; }
+  if (queue.some(q => q.isSpecial)) { hintTarget = "special"; return "✨ 수상한 손님을 탭!"; }
+  const up = anyAffordable(DATA.upgrades, false);
+  if (up) { hintTarget = "upgrade"; return `🛠️ ${up.name} 강화 가능!`; }
+  const st = anyAffordable(DATA.staff, true);
+  if (st) { hintTarget = "staff"; return `👥 ${st.name} 영입 가능!`; }
+  if (anySkillAffordable()) { hintTarget = "growth"; return "🌱 성장 수치를 사용해보세요!"; }
+  hintTarget = null;
+  return "🖐️ 환자를 탭해 조제!";
+}
+
+function updateGoalStrip() {
+  const strip = $("#goalStrip"), fill = $("#goalFill"), txt = $("#goalText"), hint = $("#hintChip");
+  if (!strip) return;
+  const ev = nextEvent();
+  if (S.pendingEvent) {
+    const pev = DATA.events.find(e => e.id === S.pendingEvent);
+    strip.classList.add("alert");
+    fill.style.width = "100%";
+    txt.textContent = `🚨 사건 발생! 「${pev.title}」`;
+  } else if (ev) {
+    strip.classList.remove("alert");
+    const p = Math.min(1, S.rep / ev.rep);
+    fill.style.width = (p * 100) + "%";
+    txt.textContent = `📜 다음 사건 「${ev.title}」 ${fmt(S.rep)} / ${fmt(ev.rep)}`;
+  } else {
+    strip.classList.remove("alert");
+    fill.style.width = "100%";
+    txt.textContent = "🎉 모든 사건 해결! 회귀로 더 강한 회차를 시작하세요";
+  }
+  hint.textContent = currentHint();
+}
+
+$("#goalStrip").addEventListener("click", () => {
+  if (S.pendingEvent) {
+    openStory(DATA.events.find(ev => ev.id === S.pendingEvent));
+  } else if (hintTarget === "upgrade" || hintTarget === "staff" || hintTarget === "growth") {
+    const btn = document.querySelector(`.nav-btn[data-tab="${hintTarget}"]`);
+    if (btn) btn.click();
+  } else if (hintTarget === "special") {
+    toast("✨ 반짝이는 손님을 탭하면 홀로그램 처방전이 열려요!");
+  } else {
+    const ev = nextEvent();
+    if (ev) toast(`⭐ 명성 ${fmt(ev.rep)}을 모으면 「${ev.title}」 사건이 열려요!`);
+  }
+});
+
+function refreshNavDots() {
+  const noti = {
+    upgrade: !!anyAffordable(DATA.upgrades, false),
+    staff: !!anyAffordable(DATA.staff, true),
+    growth: !!anySkillAffordable(),
+  };
+  $$(".nav-btn").forEach(b => b.classList.toggle("noti", !!noti[b.dataset.tab] && b.dataset.tab !== currentTab));
+}
+
+/* ---------- 업적 ---------- */
+const ACHIEVEMENTS = [
+  { id: "first",   emoji: "🩹", name: "첫 손님",        desc: "첫 복약지도를 마치다",        cond: s => s.patientsServed >= 1,        rw: { mins: 3 } },
+  { id: "p100",    emoji: "💊", name: "단골 약국",      desc: "환자 100명 조제",             cond: s => s.patientsServed >= 100,      rw: { mins: 8, rel: 1 } },
+  { id: "p1000",   emoji: "🏥", name: "동네 명물",      desc: "환자 1,000명 조제",           cond: s => s.patientsServed >= 1000,     rw: { mins: 12, rel: 2 } },
+  { id: "p10000",  emoji: "👑", name: "동네 화타",      desc: "환자 10,000명 조제",          cond: s => s.patientsServed >= 10000,    rw: { mins: 15, rel: 3 } },
+  { id: "combo15", emoji: "🔥", name: "신들린 손놀림",  desc: "콤보 15 달성 (피버타임!)",    cond: s => s.bestCombo >= 15,            rw: { mins: 8, psy: 1 } },
+  { id: "ev1",     emoji: "📜", name: "명탐정의 시작",  desc: "첫 사건 해결",                cond: s => s.clearedEvents.length >= 1,  rw: { mins: 5, psy: 1 } },
+  { id: "ev8",     emoji: "🕵️", name: "사건 수첩 반 권", desc: "사건 8개 해결",              cond: s => s.clearedEvents.length >= 8,  rw: { mins: 12, tech: 2 } },
+  { id: "case3",   emoji: "✨", name: "홀로그램 입문",  desc: "수수께끼 환자 3명 해결",      cond: s => s.solvedCases.length >= 3,    rw: { mins: 8, tech: 1 } },
+  { id: "case12",  emoji: "🔮", name: "홀로그램 마스터", desc: "수수께끼 환자 전원 해결",    cond: s => s.solvedCases.length >= 12,   rw: { mins: 15, tech: 3 } },
+  { id: "staff6",  emoji: "👥", name: "가림약국 완전체", desc: "식구 6명 전원 영입",         cond: s => Object.keys(s.staff).length >= 6, rw: { mins: 12, rel: 2 } },
+  { id: "regress1", emoji: "🌌", name: "두 번째 회차",  desc: "첫 오로라 회귀",              cond: s => s.regressions >= 1,           rw: { mins: 10, psy: 2 } },
+  { id: "ev16",    emoji: "🏆", name: "전설의 동네약사", desc: "모든 사건 해결",             cond: s => s.clearedEvents.length >= 16, rw: { mins: 20, psy: 2, rel: 2, tech: 2 } },
+];
+
+function checkAchievements() {
+  if (!S.ach) S.ach = [];
+  for (const a of ACHIEVEMENTS) {
+    if (S.ach.includes(a.id) || !a.cond(S)) continue;
+    S.ach.push(a.id);
+    const gold = Math.max(50, Math.floor(goldPerSec() * 60 * a.rw.mins));
+    S.gold += gold;
+    S.psy += a.rw.psy || 0;
+    S.rel += a.rw.rel || 0;
+    S.tech += a.rw.tech || 0;
+    toast(`🏆 업적 달성! 「${a.name}」 +${fmt(gold)}💰`);
+    save();
+  }
+}
+
 /* ---------- HUD ---------- */
 function updateHUD() {
   $("#goldVal").textContent = fmt(S.gold);
@@ -851,6 +1024,10 @@ function updateHUD() {
   $("#repLbl").textContent = ev ? `명성 (다음 사건 ${fmt(ev.rep)})` : "명성 (완결!)";
   if (S.lifetimeRep >= AURORA_REQ * 0.7) $("#scene").classList.add("aurora-on");
   renderOriginCheckBadge();
+  updateGoalStrip();
+  refreshNavDots();
+  checkAchievements();
+  tickFever();
   // 패널 버튼 갱신 (비용 도달 알림)
   refreshAfford();
   maybeShowFirstEpisodePromo();
@@ -992,7 +1169,8 @@ function renderCards() {
           <div class="cg-desc">${ev.card.desc}</div>
           <span class="cg-ep">${caseLabel(ev)} · 「${ev.title}」</span>
         </div>
-        <button class="modal-btn" onclick="document.querySelector('#genericBack').classList.remove('show')">닫기</button>`;
+        ${originReadBtnHtml(ev)}
+        <button class="modal-btn sub" onclick="document.querySelector('#genericBack').classList.remove('show')">닫기</button>`;
       $("#genericBack").classList.add("show");
     });
   });
@@ -1002,7 +1180,20 @@ function renderCards() {
 function renderEtc() {
   const p = $("#panel");
   p.innerHTML = `
-    <div class="panel-title">⚙️ 약국 운영 일지</div>
+    <div class="panel-title">🏆 업적 <small>${(S.ach || []).length}/${ACHIEVEMENTS.length} 달성</small></div>
+    ${ACHIEVEMENTS.map(a => {
+      const done = (S.ach || []).includes(a.id);
+      return `
+      <div class="item-card ach-card ${done ? "done" : ""}">
+        <div class="big-ico">${done ? a.emoji : "🔒"}</div>
+        <div class="info">
+          <div class="nm">${a.name}</div>
+          <div class="ds">${a.desc}</div>
+        </div>
+        <span class="ach-badge">${done ? "달성!" : "도전 중"}</span>
+      </div>`;
+    }).join("")}
+    <div class="panel-title" style="margin-top:14px;">⚙️ 약국 운영 일지</div>
     <div class="item-card" style="flex-direction:column; align-items:stretch; gap:0;">
       <div class="settings-row"><span>👨‍⚕️ 누적 복약지도</span><b class="jua">${fmt(S.patientsServed)}명</b></div>
       <div class="settings-row"><span>⭐ 누적 명성</span><b class="jua">${fmt(S.lifetimeRep)}</b></div>
@@ -1233,7 +1424,7 @@ let lastSpecial = Date.now();
 const SPECIAL_INTERVAL = 75000; // 75초마다 특수 환자 기회
 
 function loop(now) {
-  if (now - lastSpawn > spawnInterval()) {
+  if (now - lastSpawn > spawnInterval() / (isFever() ? 3 : 1)) {
     lastSpawn = now;
     if (queue.length < MAX_QUEUE) {
       const dueSpecial = Date.now() - lastSpecial > SPECIAL_INTERVAL && !specialWaiting && S.clearedEvents.length >= 2;

@@ -1350,3 +1350,119 @@ h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
   #scene { height: 264px; }
   #shelves { display: none; }
 }
+
+/* ---------- 다음 목표 스트립 ---------- */
+#goalStrip {
+  position: relative;
+  height: 36px;
+  flex-shrink: 0;
+  background: #efe6d2;
+  border-bottom: 2px solid #e0d2b4;
+  cursor: pointer;
+  overflow: hidden;
+  z-index: 4;
+}
+#goalFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0%;
+  background: linear-gradient(90deg, #bdebdc, var(--mint));
+  transition: width .5s ease;
+}
+.goal-inner {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 12px;
+}
+#goalText {
+  font-family: 'Jua', sans-serif;
+  font-size: .72rem;
+  color: var(--mint-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+#hintChip {
+  flex-shrink: 0;
+  font-family: 'Jua', sans-serif;
+  font-size: .62rem;
+  background: #fff;
+  color: var(--peach-deep);
+  border: 1.5px solid var(--peach);
+  border-radius: 20px;
+  padding: 3px 10px;
+  animation: pulse 1.6s infinite;
+  max-width: 46%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#goalStrip.alert { background: #ffe2d2; border-color: var(--peach); }
+#goalStrip.alert #goalFill { background: linear-gradient(90deg, var(--peach), var(--rose)); opacity: .55; }
+#goalStrip.alert #goalText { color: #b04a2e; }
+
+/* ---------- 탭 콤보 / 피버 ---------- */
+#comboBox {
+  position: absolute;
+  top: 52px; left: 10px;
+  z-index: 8;
+  font-family: 'Jua', sans-serif;
+  font-size: .8rem;
+  color: #d8641f;
+  background: rgba(255,253,247,.92);
+  border: 2px solid var(--gold);
+  border-radius: 14px;
+  padding: 4px 11px;
+  display: none;
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff;
+}
+#comboBox.show { display: block; animation: comboPop .18s ease-out; }
+#comboBox.fever {
+  color: #fff;
+  background: linear-gradient(135deg, #ffb347, #ff7a59);
+  border-color: #fff;
+  box-shadow: 0 0 14px rgba(255,150,60,.8);
+  text-shadow: none;
+}
+@keyframes comboPop {
+  from { transform: scale(1.35); }
+  to   { transform: scale(1); }
+}
+#scene.fever {
+  box-shadow: inset 0 0 60px rgba(255,170,60,.45);
+}
+#scene.fever #sign {
+  border-color: var(--gold-deep);
+  box-shadow: 0 4px 0 rgba(232,168,32,.5), 0 0 18px rgba(255,200,80,.7);
+}
+
+/* ---------- 업적 ---------- */
+.ach-card { opacity: .55; }
+.ach-card.done { opacity: 1; }
+.ach-card.done .big-ico { background: linear-gradient(180deg, #fff3d2, #ffe6a8); }
+.ach-badge {
+  flex-shrink: 0;
+  font-family: 'Jua', sans-serif;
+  font-size: .62rem;
+  padding: 5px 10px;
+  border-radius: 12px;
+  background: #ece4d4;
+  color: #a39780;
+}
+.ach-card.done .ach-badge { background: var(--mint); color: #fff; }
+
+/* ---------- 원작 읽기 CTA ---------- */
+.modal-btn.origin-read {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  background: linear-gradient(180deg, var(--peach), var(--peach-deep));
+  box-shadow: 0 4px 0 #d4744d;
+  color: #fff;
+}
