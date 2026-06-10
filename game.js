@@ -1327,19 +1327,19 @@ let pendingOfflineReward = false;
 
 /* ---------- 비주얼 노벨 프롤로그 ---------- */
 const PROLOGUE_SCENES = [
-  { bg: "vn-glory", art: `<div class="vn-art">🏆</div>`, spk: "2024년, 서울",
+  { bg: "vn-glory", spk: "2024년, 서울",
     text: "2년 연속 모범약국 선정.\n임가민의 약국은 이 동네에서 가장 믿음직한 곳이었다." },
-  { bg: "vn-fall", art: `<div class="vn-art">🥀</div>`, spk: "그날",
+  { bg: "vn-fall", spk: "그날",
     text: "하지만 누군가 조작한 약화사고 하나로—\n환자도, 약국도, 명예도. 전부 잃었다." },
-  { bg: "vn-aurora", art: `<div class="vn-art" style="font-size:3.2rem; margin-top:30%;">🌌</div>`, spk: "오로라가 뜬 밤",
+  { bg: "vn-aurora", spk: "오로라가 뜬 밤",
     text: "폐업 신고를 마친 그 밤,\n하늘에는 21년 만의 오로라가 떠올랐다." },
-  { bg: "vn-rx", art: `<div class="vn-rx-paper"><div class="rx-t">처 방 전</div><div class="rx-m">【여기까지 왔어.\n이제 어떻게 하면 되는 거지?】</div></div>`, spk: "삐— 드르륵—",
+  { bg: "vn-rx", spk: "삐— 드르륵—",
     text: "분명 꺼져 있어야 할 프린터에서\n의문의 처방전 한 장이 출력됐다." },
-  { bg: "vn-2001", art: `<div class="vn-cal"><div class="c-top">JULY · 화요일</div><div class="c-date">2001. 7. 24</div></div>`, spk: "눈을 떠 보니",
+  { bg: "vn-2001", spk: "눈을 떠 보니",
     text: "23년 전, 신입 약사 시절의 가림약국.\n— 회귀했다." },
-  { bg: "vn-holo", art: `<div class="vn-holo-cards"><div class="hc hc1"></div><div class="hc hc2"></div><div class="hc hc3"></div></div>`, spk: "그리고, 능력",
+  { bg: "vn-holo", spk: "그리고, 능력",
     text: "처방전을 만지는 순간, 환자의 모든 약력이 눈앞에 펼쳐진다.\n이 시대에는 존재할 수 없는 힘." },
-  { bg: "vn-vow", art: `<div class="vn-gamin">${CHARS.gamin()}</div>`, spk: "임가민",
+  { bg: "vn-vow", spk: "임가민",
     text: "“두 번째 인생, 이번엔 잃지 않아.\n동네 약사도 2회차면— 동네 화타가 된다.”", last: true },
 ];
 
@@ -1350,7 +1350,7 @@ function vnRenderScene() {
   const stage = $("#vnStage");
   stage.className = "";
   stage.classList.add(sc.bg);
-  stage.innerHTML = sc.art;
+  stage.innerHTML = "";
   $("#vnSpk").textContent = sc.spk;
   $("#vnNext").style.display = "none";
   // 타이핑 연출

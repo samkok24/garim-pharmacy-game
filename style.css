@@ -1499,7 +1499,18 @@ h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: background 1s;
+  background-image: url("assets/prologue-vn-scenes.png");
+  background-repeat: no-repeat;
+  background-size: 400% 200%;
+  background-color: #10181f;
+  transition: background-position .3s;
+}
+#vnStage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 58%, rgba(0,0,0,.42) 100%);
+  pointer-events: none;
 }
 .vn-art {
   font-size: 5.2rem;
@@ -1512,37 +1523,14 @@ h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
   to   { transform: scale(1) translateY(0); opacity: 1; }
 }
 /* 장면별 배경 */
-#vnStage.vn-glory { background: linear-gradient(180deg, #ffe9bf, #ffd9a0 60%, #f4b96a); }
-#vnStage.vn-glory::after {
-  content: "✨ ✨ ✨";
-  position: absolute; top: 18%;
-  font-size: 1.3rem; letter-spacing: 28px;
-  animation: pulse 1.8s infinite;
-}
-#vnStage.vn-fall { background: linear-gradient(180deg, #232b3a, #11161f); }
-#vnStage.vn-fall::after {
-  content: "";
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(105deg, transparent 0 16px, rgba(160,180,210,.10) 16px 17px);
-  animation: vnRain .7s linear infinite;
-}
+#vnStage.vn-glory { background-position: 0% 0%; }
+#vnStage.vn-fall { background-position: 33.333% 0%; }
 @keyframes vnRain { from { background-position: 0 0; } to { background-position: -40px 60px; } }
-#vnStage.vn-aurora { background: linear-gradient(180deg, #0d1b2e, #1b2c4a 70%, #23304e); }
-#vnStage.vn-aurora::before {
-  content: "";
-  position: absolute; top: 0; left: -10%;
-  width: 120%; height: 46%;
-  background:
-    radial-gradient(ellipse 50% 100% at 25% 0%, rgba(120,255,200,.7), transparent 70%),
-    radial-gradient(ellipse 45% 100% at 55% 10%, rgba(150,160,255,.6), transparent 70%),
-    radial-gradient(ellipse 50% 100% at 80% 0%, rgba(255,150,230,.5), transparent 70%);
-  filter: blur(8px);
-  animation: auroraWave 5s ease-in-out infinite alternate;
-}
-#vnStage.vn-rx { background: linear-gradient(180deg, #1a222c, #232f3c); }
-#vnStage.vn-2001 { background: linear-gradient(180deg, #bfe9ff, #e6f7ff 60%, #d8efe8); }
-#vnStage.vn-holo { background: linear-gradient(135deg, #0f2e2a, #143b46); }
-#vnStage.vn-vow { background: linear-gradient(180deg, #fff3da, #ffe4c2); }
+#vnStage.vn-aurora { background-position: 66.667% 0%; }
+#vnStage.vn-rx { background-position: 100% 0%; }
+#vnStage.vn-2001 { background-position: 0% 100%; }
+#vnStage.vn-holo { background-position: 33.333% 100%; }
+#vnStage.vn-vow { background-position: 66.667% 100%; }
 
 /* 프린터 처방전 소품 */
 .vn-rx-paper {
