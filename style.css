@@ -1493,7 +1493,10 @@ h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
   cursor: pointer;
 }
 #vnStage {
-  flex: 1;
+  flex: none;
+  width: 100%;
+  aspect-ratio: 836 / 941;
+  max-height: 56dvh;
   position: relative;
   display: flex;
   align-items: center;
@@ -1587,7 +1590,7 @@ h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
 
 /* VN 텍스트 박스 */
 #vnBox {
-  flex-shrink: 0;
+  flex: 1;
   min-height: 174px;
   background: rgba(14, 20, 26, .93);
   border-top: 2px solid rgba(143, 217, 200, .6);

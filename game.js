@@ -98,6 +98,8 @@ const DEFAULT_STATE = () => ({
   bestCombo: 0,
   ach: [],           // 달성한 업적 id
   tutorialDone: false,
+  metSpecial: false,
+  lastDaily: "",
   lastSave: Date.now(),
   pendingEvent: null,
   promo: {
@@ -210,6 +212,11 @@ function spawnPatient(special = false) {
     mood = pickCustomerMood();
     el.innerHTML = p.svg() + patientBubbleHtml(talk, mood);
   }
+  if (special && !S.metSpecial) {
+    S.metSpecial = true;
+    gaminSay("저 손님… 뭔가 있어.");
+    toast("✨ 수상한 손님 등장! 탭하면 홀로그램 처방전이 열려요");
+  }
   const item = { el, isSpecial: special, caseIdx, mood, bubbleTimers: [] };
   el.addEventListener("pointerdown", e => {
     e.stopPropagation();
@@ -291,7 +298,7 @@ function comboUI() {
     box.textContent = `⚡ 피버타임! ${left}s · 골드 x2`;
     box.classList.add("show", "fever");
   } else if (combo >= 2) {
-    box.textContent = `🔥 콤보 x${combo} (+${Math.min(combo, 20) * 5}%)`;
+    box.textContent = `🔥 x${combo} (+${Math.min(combo, 20) * 5}%) · ⚡피버까지 ${Math.max(0, FEVER_AT - combo)}`;
     box.classList.add("show");
     box.classList.remove("fever");
   } else {
@@ -555,6 +562,11 @@ function renderStory() {
       setTimeout(maybeShowFirstEpisodePromo, 700);
       if (ev.id === DATA.events[DATA.events.length - 1].id) {
         setTimeout(() => toast("🎉 모든 사건 해결! 다음 회차의 경고가 열렸습니다"), 2600);
+      } else {
+        const nx = nextEvent();
+        if (nx && !S.pendingEvent) {
+          setTimeout(() => toast(`🔎 다음 사건 「${nx.title}」 — 명성 ${fmt(nx.rep)} 달성 시 발생!`), 2900);
+        }
       }
     });
   }
@@ -1032,6 +1044,7 @@ function updateHUD() {
   refreshNavDots();
   checkAchievements();
   tickFever();
+  maybeDailyBonus();
   // 패널 버튼 갱신 (비용 도달 알림)
   refreshAfford();
   maybeShowFirstEpisodePromo();
@@ -1293,6 +1306,43 @@ function toast(msg) {
 }
 window.toast = toast;
 
+/* ---------- 일일 첫 출근 보너스 ---------- */
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function maybeDailyBonus() {
+  if (S.lastDaily === todayStr()) return;
+  if (gameHalted()) return;
+  if (document.querySelector(".modal-back.show")) return;
+  if (!$("#startScreen") || !$("#startScreen").classList.contains("hide")) return;
+  S.lastDaily = todayStr();
+  const gold = Math.max(300, Math.floor(goldPerSec() * 60 * 30));
+  const stats = ["psy", "rel", "tech"];
+  const pick = stats[Math.floor(Math.random() * 3)];
+  S[pick] += 1;
+  S.gold += gold;
+  save();
+  const statName = { psy: "🧠 심리", rel: "💞 관계", tech: "⚗️ 기술" }[pick];
+  const m = $("#genericModal");
+  m.innerHTML = `
+    <div class="offline-emoji">🌅</div>
+    <div class="rx-head" style="border:none; padding-bottom:0; margin-bottom:6px;"><h2>오늘의 첫 출근!</h2></div>
+    <div class="scene-txt" style="text-align:center; line-height:1.8;">
+      가림약국의 셔터가 올라갑니다.<br>오늘도 잘 부탁해요, 약사님!
+    </div>
+    <div class="reward-box">
+      <div class="rw-items">
+        <span class="rw-chip">💰 +${fmt(gold)}</span>
+        <span class="rw-chip">${statName} +1</span>
+      </div>
+    </div>
+    <button class="modal-btn" onclick="document.querySelector('#genericBack').classList.remove('show')">💊 영업 시작!</button>`;
+  $("#genericBack").classList.add("show");
+  updateHUD();
+}
+
 /* ---------- 오프라인 보상 ---------- */
 function offlineReward() {
   const elapsed = (Date.now() - S.lastSave) / 1000;
@@ -1360,28 +1410,35 @@ function positionPrologueCg() {
   const stageHeight = stage.clientHeight;
   if (!stageWidth || !stageHeight) return;
 
-  const sheetAspect = image.naturalWidth && image.naturalHeight
-    ? image.naturalWidth / image.naturalHeight
-    : PROLOGUE_CG_SHEET_ASPECT;
-  const sheetHeight = stageHeight * PROLOGUE_CG_ROWS;
-  const sheetWidth = sheetHeight * sheetAspect;
-  const panelWidth = sheetWidth / PROLOGUE_CG_COLUMNS;
-  const left = stageWidth / 2 - (sc.col + 0.5) * panelWidth;
-  const top = -sc.row * stageHeight;
+  const natW = image.naturalWidth || 1672;
+  const natH = image.naturalHeight || Math.round(1672 / PROLOGUE_CG_SHEET_ASPECT);
+  const panelW = natW / PROLOGUE_CG_COLUMNS;
+  const panelH = natH / PROLOGUE_CG_ROWS;
+  // cover-fit: 패널이 스테이지를 빈틈없이 덮는 최소 배율
+  const scale = Math.max(stageWidth / panelW, stageHeight / panelH);
+  const left = stageWidth / 2 - (sc.col + 0.5) * panelW * scale;
+  const top = stageHeight / 2 - (sc.row + 0.5) * panelH * scale;
 
-  image.style.width = `${sheetWidth}px`;
-  image.style.height = `${sheetHeight}px`;
+  image.style.width = `${natW * scale}px`;
+  image.style.height = `${natH * scale}px`;
   image.style.transform = `translate(${left}px, ${top}px)`;
 }
+
+window.addEventListener("resize", () => {
+  if (!$("#prologue").hidden) positionPrologueCg();
+});
 
 function vnRenderScene() {
   const sc = PROLOGUE_SCENES[VN.idx];
   const stage = $("#vnStage");
   stage.className = "";
   stage.classList.add(sc.bg);
-  stage.innerHTML = `<img class="vn-cg" src="${PROLOGUE_CG_SRC}" alt="">`;
-  const image = stage.querySelector(".vn-cg");
-  if (image) image.addEventListener("load", positionPrologueCg, { once: true });
+  let image = stage.querySelector(".vn-cg");
+  if (!image) {
+    stage.innerHTML = `<img class="vn-cg" src="${PROLOGUE_CG_SRC}" alt="">`;
+    image = stage.querySelector(".vn-cg");
+    image.addEventListener("load", positionPrologueCg, { once: true });
+  }
   positionPrologueCg();
   requestAnimationFrame(positionPrologueCg);
   $("#vnSpk").textContent = sc.spk;
@@ -1427,6 +1484,7 @@ function showPrologue(withTutorial) {
   VN.idx = 0;
   VN.withTutorial = !!withTutorial;
   $("#prologue").hidden = false;
+  haltBrew();
   vnRenderScene();
 }
 
@@ -1498,6 +1556,7 @@ function tutAdvance() {
 function startTutorial() {
   TUT.active = true;
   TUT.step = 0;
+  haltBrew();
   tutRender();
 }
 
@@ -1599,7 +1658,28 @@ let lastSpawn = 0;
 let lastSpecial = Date.now();
 const SPECIAL_INTERVAL = 75000; // 75초마다 특수 환자 기회
 
+function gameHalted() {
+  return (typeof TUT !== "undefined" && TUT.active) || !$("#prologue").hidden;
+}
+
+function haltBrew() {
+  brewing = false;
+  $("#gamin").classList.remove("working");
+  $("#brewBarWrap").classList.remove("show");
+  $("#brewBar").style.width = "0%";
+}
+
 function loop(now) {
+  if (gameHalted()) {
+    // 튜토리얼 "환자 탭" 단계인데 탭할 환자가 없으면 한 명만 입장시킨다
+    if (TUT.active && TUT_STEPS[TUT.step]?.action === "tap"
+        && !queue.some(q => !q.isSpecial) && now - lastSpawn > 800) {
+      lastSpawn = now;
+      spawnPatient(false);
+    }
+    requestAnimationFrame(loop);
+    return;
+  }
   if (now - lastSpawn > spawnInterval() / (isFever() ? 3 : 1)) {
     lastSpawn = now;
     if (queue.length < MAX_QUEUE) {
@@ -1621,6 +1701,7 @@ document.addEventListener("visibilitychange", () => { if (document.hidden) save(
 function init() {
   $("#gamin").innerHTML = CHARS.gamin();
   const loaded = load();
+  if (!loaded) S.lastDaily = todayStr(); // 첫날은 출근 보너스 생략
   pendingFirstVisitIntro = !loaded;
   pendingOfflineReward = loaded;
   recalcMods();
