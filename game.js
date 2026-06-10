@@ -1326,31 +1326,64 @@ let pendingFirstVisitIntro = false;
 let pendingOfflineReward = false;
 
 /* ---------- 비주얼 노벨 프롤로그 ---------- */
+const PROLOGUE_CG_SRC = "assets/prologue-vn-scenes.png";
+const PROLOGUE_CG_COLUMNS = 4;
+const PROLOGUE_CG_ROWS = 2;
+const PROLOGUE_CG_SHEET_ASPECT = 1672 / 941;
+
 const PROLOGUE_SCENES = [
-  { bg: "vn-glory", spk: "2024년, 서울",
+  { bg: "vn-glory", col: 0, row: 0, spk: "2024년, 서울",
     text: "2년 연속 모범약국 선정.\n임가민의 약국은 이 동네에서 가장 믿음직한 곳이었다." },
-  { bg: "vn-fall", spk: "그날",
+  { bg: "vn-fall", col: 1, row: 0, spk: "그날",
     text: "하지만 누군가 조작한 약화사고 하나로—\n환자도, 약국도, 명예도. 전부 잃었다." },
-  { bg: "vn-aurora", spk: "오로라가 뜬 밤",
+  { bg: "vn-aurora", col: 2, row: 0, spk: "오로라가 뜬 밤",
     text: "폐업 신고를 마친 그 밤,\n하늘에는 21년 만의 오로라가 떠올랐다." },
-  { bg: "vn-rx", spk: "삐— 드르륵—",
+  { bg: "vn-rx", col: 3, row: 0, spk: "삐— 드르륵—",
     text: "분명 꺼져 있어야 할 프린터에서\n의문의 처방전 한 장이 출력됐다." },
-  { bg: "vn-2001", spk: "눈을 떠 보니",
+  { bg: "vn-2001", col: 0, row: 1, spk: "눈을 떠 보니",
     text: "23년 전, 신입 약사 시절의 가림약국.\n— 회귀했다." },
-  { bg: "vn-holo", spk: "그리고, 능력",
+  { bg: "vn-holo", col: 1, row: 1, spk: "그리고, 능력",
     text: "처방전을 만지는 순간, 환자의 모든 약력이 눈앞에 펼쳐진다.\n이 시대에는 존재할 수 없는 힘." },
-  { bg: "vn-vow", spk: "임가민",
+  { bg: "vn-vow", col: 2, row: 1, spk: "임가민",
     text: "“두 번째 인생, 이번엔 잃지 않아.\n동네 약사도 2회차면— 동네 화타가 된다.”", last: true },
 ];
 
 const VN = { idx: 0, typing: false, typeTimer: null, withTutorial: false };
+
+function positionPrologueCg() {
+  const stage = $("#vnStage");
+  const image = stage.querySelector(".vn-cg");
+  const sc = PROLOGUE_SCENES[VN.idx];
+  if (!image || !sc) return;
+
+  const stageWidth = stage.clientWidth;
+  const stageHeight = stage.clientHeight;
+  if (!stageWidth || !stageHeight) return;
+
+  const sheetAspect = image.naturalWidth && image.naturalHeight
+    ? image.naturalWidth / image.naturalHeight
+    : PROLOGUE_CG_SHEET_ASPECT;
+  const sheetHeight = stageHeight * PROLOGUE_CG_ROWS;
+  const sheetWidth = sheetHeight * sheetAspect;
+  const panelWidth = sheetWidth / PROLOGUE_CG_COLUMNS;
+  const left = stageWidth / 2 - (sc.col + 0.5) * panelWidth;
+  const top = -sc.row * stageHeight;
+
+  image.style.width = `${sheetWidth}px`;
+  image.style.height = `${sheetHeight}px`;
+  image.style.transform = `translate(${left}px, ${top}px)`;
+}
 
 function vnRenderScene() {
   const sc = PROLOGUE_SCENES[VN.idx];
   const stage = $("#vnStage");
   stage.className = "";
   stage.classList.add(sc.bg);
-  stage.innerHTML = "";
+  stage.innerHTML = `<img class="vn-cg" src="${PROLOGUE_CG_SRC}" alt="">`;
+  const image = stage.querySelector(".vn-cg");
+  if (image) image.addEventListener("load", positionPrologueCg, { once: true });
+  positionPrologueCg();
+  requestAnimationFrame(positionPrologueCg);
   $("#vnSpk").textContent = sc.spk;
   $("#vnNext").style.display = "none";
   // 타이핑 연출
@@ -1408,6 +1441,9 @@ $("#prologue").addEventListener("pointerdown", e => {
   vnTap();
 });
 $("#prologueSkip").addEventListener("click", endPrologue);
+window.addEventListener("resize", () => {
+  if (!$("#prologue").hidden) positionPrologueCg();
+});
 
 /* ---------- 스포트라이트 튜토리얼 ---------- */
 const TUT_STEPS = [
