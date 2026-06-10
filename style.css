@@ -232,7 +232,7 @@ h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
   height: 312px;
   flex-shrink: 0;
   overflow: hidden;
-  background: linear-gradient(180deg, var(--sky-day-1) 0%, var(--sky-day-2) 52%, #f6e9d2 52%, #f1dfc2 100%);
+  background: #f3d3aa url("assets/pharmacy-interior-pixel.png") center bottom / cover no-repeat;
   cursor: pointer;
 }
 
@@ -263,6 +263,7 @@ h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
   border-radius: 50px;
   opacity: .85;
   animation: drift linear infinite;
+  display: none;
 }
 .cloud::before, .cloud::after {
   content: ""; position: absolute; background: #fff; border-radius: 50%;
@@ -334,7 +335,7 @@ h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
   position: absolute;
   bottom: 98px; left: 8%;
   width: 84%; height: 56px;
-  display: flex;
+  display: none;
   gap: 6px;
   justify-content: center;
   align-items: flex-end;
@@ -653,6 +654,25 @@ h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
 }
 
 /* 회귀 버튼 */
+#menuBtn {
+  position: absolute;
+  top: 8px; left: 8px;
+  z-index: 7;
+  background: rgba(255,253,247,.92);
+  border: 2px solid var(--mint-deep);
+  color: var(--mint-dark);
+  font-family: 'Jua', sans-serif;
+  font-size: .68rem;
+  padding: 6px 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(46,138,120,.22);
+}
+#menuBtn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(46,138,120,.22);
+}
+
 #auroraBtn {
   position: absolute;
   top: 8px; right: 8px;

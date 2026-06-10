@@ -650,6 +650,11 @@ $("#auroraBtn").addEventListener("pointerdown", e => {
   openAuroraConfirm();
 });
 
+$("#menuBtn").addEventListener("pointerdown", e => {
+  e.stopPropagation();
+  showMainScreen();
+});
+
 function openAuroraConfirm() {
   const gain = shardsOnRegress() - S.shards;
   const m = $("#genericModal");
@@ -1148,6 +1153,11 @@ function showFirstVisitIntro() {
 function enterGameFromStart() {
   const start = $("#startScreen");
   if (start) start.classList.add("hide");
+  const continueBtn = $("#continueGameBtn");
+  if (continueBtn) {
+    continueBtn.disabled = false;
+    continueBtn.title = "현재 약국으로 이어하기";
+  }
   if (pendingOfflineReward) {
     pendingOfflineReward = false;
     offlineReward();
@@ -1155,6 +1165,21 @@ function enterGameFromStart() {
   if (pendingFirstVisitIntro) {
     pendingFirstVisitIntro = false;
     setTimeout(showFirstVisitIntro, 180);
+  }
+}
+
+function showMainScreen() {
+  const start = $("#startScreen");
+  if (!start) return;
+  save();
+  $("#genericBack").classList.remove("show");
+  storyBack.classList.remove("show");
+  specialBack.classList.remove("show");
+  start.classList.remove("hide");
+  const continueBtn = $("#continueGameBtn");
+  if (continueBtn) {
+    continueBtn.disabled = false;
+    continueBtn.title = "현재 약국으로 이어하기";
   }
 }
 
