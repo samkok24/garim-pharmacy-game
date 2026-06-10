@@ -1,0 +1,1154 @@
+/* ============================================
+   가림약국 키우기 — 스타일
+   파스텔 민트 × 크림 약국, 캐주얼 & 귀여움
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap');
+
+:root {
+  --mint: #8fd9c8;
+  --mint-deep: #4cb8a4;
+  --mint-dark: #2e8a78;
+  --cream: #fff8ec;
+  --cream-deep: #ffefd2;
+  --peach: #ffb88a;
+  --peach-deep: #f4926a;
+  --rose: #ff9aa8;
+  --gold: #ffc94d;
+  --gold-deep: #e8a820;
+  --ink: #4a3f35;
+  --ink-soft: #8a7a6b;
+  --paper: #fffdf7;
+  --sky-day-1: #bfe9ff;
+  --sky-day-2: #e6f7ff;
+  --psy: #b89aff;
+  --rel: #ff9aa8;
+  --tech: #6ec6e8;
+  --shadow: 0 4px 0 rgba(74, 63, 53, .12);
+  --radius: 18px;
+  font-size: 16px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: 'Gowun Dodum', sans-serif;
+  background: #d8efe8;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(255,255,255,.6) 0 6px, transparent 7px),
+    radial-gradient(circle at 70% 30%, rgba(255,255,255,.45) 0 4px, transparent 5px),
+    radial-gradient(circle at 40% 70%, rgba(255,255,255,.4) 0 5px, transparent 6px),
+    radial-gradient(circle at 90% 80%, rgba(255,255,255,.5) 0 4px, transparent 5px);
+  background-size: 340px 340px;
+  color: var(--ink);
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+}
+
+#app {
+  width: 100%;
+  max-width: 460px;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--cream);
+  box-shadow: 0 0 40px rgba(46,138,120,.25);
+  position: relative;
+  overflow: hidden;
+}
+
+h1, h2, h3, .jua { font-family: 'Jua', sans-serif; font-weight: 400; }
+
+/* ---------- 상단 자원 바 ---------- */
+#topbar {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px 6px;
+  background: linear-gradient(180deg, var(--mint) 0%, #a8e3d5 100%);
+  border-bottom: 3px solid var(--mint-deep);
+  z-index: 5;
+}
+.res {
+  flex: 1;
+  background: rgba(255, 253, 247, .92);
+  border-radius: 14px;
+  padding: 5px 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: inset 0 -2px 0 rgba(74,63,53,.08);
+  min-width: 0;
+}
+.res .ico { font-size: 1.05rem; flex-shrink: 0; }
+.res .val-wrap { display: flex; flex-direction: column; min-width: 0; }
+.res .lbl { font-size: .58rem; color: var(--ink-soft); line-height: 1; }
+.res .val {
+  font-family: 'Jua', sans-serif;
+  font-size: .95rem;
+  line-height: 1.15;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.res.gold .val { color: var(--gold-deep); }
+.res.rep .val { color: var(--mint-dark); }
+.res.aurora .val { color: #7c5cc4; }
+
+/* ---------- 약국 씬 ---------- */
+#scene {
+  position: relative;
+  height: 312px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--sky-day-1) 0%, var(--sky-day-2) 52%, #f6e9d2 52%, #f1dfc2 100%);
+  cursor: pointer;
+}
+
+/* 오로라 */
+#auroraFx {
+  position: absolute;
+  top: -20px; left: -10%;
+  width: 120%; height: 120px;
+  opacity: 0;
+  transition: opacity 2s;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 100% at 30% 0%, rgba(120,255,200,.55), transparent 70%),
+    radial-gradient(ellipse 50% 100% at 60% 0%, rgba(150,160,255,.45), transparent 70%),
+    radial-gradient(ellipse 55% 100% at 85% 0%, rgba(255,150,230,.4), transparent 70%);
+  filter: blur(6px);
+  animation: auroraWave 6s ease-in-out infinite alternate;
+}
+#scene.aurora-on #auroraFx { opacity: 1; }
+@keyframes auroraWave {
+  from { transform: skewX(-6deg) translateX(-12px); }
+  to   { transform: skewX(6deg) translateX(12px); }
+}
+
+.cloud {
+  position: absolute;
+  background: #fff;
+  border-radius: 50px;
+  opacity: .85;
+  animation: drift linear infinite;
+}
+.cloud::before, .cloud::after {
+  content: ""; position: absolute; background: #fff; border-radius: 50%;
+}
+.cloud.c1 { width: 58px; height: 18px; top: 26px; animation-duration: 46s; }
+.cloud.c1::before { width: 24px; height: 24px; top: -12px; left: 10px; }
+.cloud.c1::after  { width: 18px; height: 18px; top: -8px; left: 30px; }
+.cloud.c2 { width: 44px; height: 14px; top: 60px; animation-duration: 64s; animation-delay: -30s; }
+.cloud.c2::before { width: 18px; height: 18px; top: -9px; left: 8px; }
+.cloud.c2::after  { width: 14px; height: 14px; top: -6px; left: 22px; }
+@keyframes drift {
+  from { left: -80px; }
+  to   { left: 110%; }
+}
+
+/* 간판 */
+#sign {
+  position: absolute;
+  top: 58px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--paper);
+  border: 3px solid var(--mint-deep);
+  border-radius: 16px;
+  padding: 5px 22px 7px;
+  text-align: center;
+  box-shadow: 0 4px 0 rgba(46,138,120,.3);
+  z-index: 2;
+}
+#sign .cross {
+  display: inline-block;
+  color: var(--mint-deep);
+  margin-right: 6px;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { transform: scale(1);} 50% { transform: scale(1.18);} }
+#sign h1 { font-size: 1.35rem; color: var(--mint-dark); display: inline-block; letter-spacing: 1px; }
+#sign .sub { font-size: .6rem; color: var(--ink-soft); margin-top: -2px; }
+
+/* 약국 건물 내부 라인 */
+#shopFloor {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 168px;
+}
+#counter {
+  position: absolute;
+  bottom: 64px; left: 8%;
+  width: 84%;
+  height: 34px;
+  background: linear-gradient(180deg, #e9bd8c, #d9a368);
+  border-radius: 10px 10px 4px 4px;
+  border: 2px solid #c08b50;
+  box-shadow: 0 5px 0 rgba(140,95,45,.35);
+  z-index: 3;
+}
+#counter::before {
+  content: "투 약 구";
+  position: absolute;
+  top: 50%; left: 16%;
+  transform: translate(-50%,-50%);
+  font-family: 'Jua', sans-serif;
+  font-size: .62rem;
+  letter-spacing: 4px;
+  color: rgba(110,70,25,.55);
+}
+
+/* 약장 배경 */
+#shelves {
+  position: absolute;
+  bottom: 98px; left: 8%;
+  width: 84%; height: 56px;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: flex-end;
+  opacity: .9;
+  z-index: 1;
+}
+.shelf {
+  flex: 1;
+  max-width: 64px;
+  height: 100%;
+  background: var(--paper);
+  border: 2px solid #e3cfae;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  place-items: center;
+  font-size: .8rem;
+  padding: 3px;
+}
+
+/* 가민 캐릭터 */
+#gamin {
+  position: absolute;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 68px;
+  height: 68px;
+  z-index: 4;
+  filter: drop-shadow(0 3px 0 rgba(74,63,53,.18));
+  transition: transform .15s;
+}
+#gamin.working { animation: brew .5s ease-in-out infinite; }
+@keyframes brew {
+  0%,100% { transform: translateX(-50%) rotate(-4deg); }
+  50%     { transform: translateX(-50%) rotate(4deg) translateY(-3px); }
+}
+#gaminBubble {
+  position: absolute;
+  bottom: 176px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--paper);
+  border: 2px solid var(--mint-deep);
+  color: var(--mint-dark);
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: .68rem;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity .3s;
+  z-index: 6;
+  pointer-events: none;
+}
+#gaminBubble.show { opacity: 1; }
+#gaminBubble::after {
+  content: "";
+  position: absolute;
+  bottom: -7px; left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--mint-deep);
+  border-bottom: none;
+}
+
+/* 조제 진행 바 */
+#brewBarWrap {
+  position: absolute;
+  bottom: 156px; left: 50%;
+  transform: translateX(-50%);
+  width: 96px; height: 10px;
+  background: rgba(255,255,255,.8);
+  border: 2px solid var(--mint-deep);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity .2s;
+}
+#brewBarWrap.show { opacity: 1; }
+#brewBar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--mint), var(--mint-deep));
+}
+
+/* 환자 줄 */
+.patient svg, #gamin svg { width: 100%; height: 100%; display: block; }
+#queue {
+  position: absolute;
+  bottom: 8px; left: 0; right: 0;
+  height: 60px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 14px;
+  z-index: 4;
+}
+.patient {
+  width: 48px;
+  height: 48px;
+  position: relative;
+  animation: walkIn .5s ease-out, bob 1.6s ease-in-out .5s infinite;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 0 rgba(74,63,53,.15));
+  transition: transform .12s;
+}
+.patient:active { transform: scale(.86); }
+@keyframes walkIn {
+  from { transform: translateX(120px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+@keyframes bob {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-4px); }
+}
+.patient .bubble,
+.patient .mood-bubble {
+  position: absolute;
+  bottom: 105%;
+  z-index: 7;
+  left: 50%;
+  transform: translateX(-50%) translateY(3px) scale(.96);
+  background: #fff;
+  border: 2px solid #e3cfae;
+  border-radius: 10px;
+  white-space: nowrap;
+  color: var(--ink-soft);
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+  pointer-events: none;
+}
+.patient .talk-bubble {
+  padding: 3px 7px;
+  font-size: .58rem;
+}
+.patient .mood-bubble {
+  min-width: 38px;
+  padding: 3px 6px 4px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  justify-content: center;
+  font-family: 'Jua', sans-serif;
+  font-size: .56rem;
+  color: var(--ink);
+}
+.patient .mood-bubble b {
+  font-size: .88rem;
+  line-height: 1;
+}
+.patient .mood-bubble small {
+  font: inherit;
+  color: var(--ink-soft);
+}
+.patient .mood-happy { border-color: var(--mint); background: #eafaf5; }
+.patient .mood-worried { border-color: #d8c5a0; background: #fffaf0; }
+.patient .mood-rush { border-color: var(--gold); background: #fff5d4; }
+.patient .mood-angry { border-color: var(--rose); background: #fff0f2; }
+.patient .mood-gift { border-color: var(--gold-deep); background: #fff7dd; }
+.patient .mood-clue { border-color: var(--psy); background: #f4efff; }
+.patient.show-talk .talk-bubble,
+.patient.show-mood .mood-bubble,
+.patient.talking .bubble {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+.patient.special {
+  animation: walkIn .5s ease-out, glowBob 1.1s ease-in-out .5s infinite;
+}
+.patient.special::after {
+  content: "✨";
+  position: absolute;
+  top: -12px; right: -10px;
+  font-size: .9rem;
+  animation: pulse 1s infinite;
+}
+@keyframes glowBob {
+  0%,100% { transform: translateY(0); filter: drop-shadow(0 0 5px var(--gold)); }
+  50%     { transform: translateY(-5px); filter: drop-shadow(0 0 12px var(--gold)); }
+}
+
+/* 동료 카메오 */
+.staff-cameo {
+  position: absolute;
+  bottom: 56px;
+  width: 62px;
+  height: 62px;
+  z-index: 6;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .2s, transform .2s;
+  pointer-events: none;
+}
+.staff-cameo.left { left: 10px; }
+.staff-cameo.right { right: 10px; }
+.staff-cameo.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.staff-cameo .staff-face {
+  width: 52px;
+  height: 52px;
+  filter: drop-shadow(0 2px 0 rgba(74,63,53,.16));
+}
+.staff-cameo .staff-speech {
+  position: absolute;
+  bottom: 42px;
+  width: 160px;
+  background: var(--paper);
+  border: 2px solid var(--mint-deep);
+  border-radius: 12px;
+  padding: 6px 8px;
+  box-shadow: 0 3px 0 rgba(46,138,120,.18);
+  color: var(--ink);
+}
+.staff-cameo.left .staff-speech { left: 36px; }
+.staff-cameo.right .staff-speech { right: 36px; }
+.staff-cameo .staff-speech b {
+  font-family: 'Jua', sans-serif;
+  font-size: .72rem;
+  color: var(--mint-dark);
+  margin-right: 5px;
+}
+.staff-cameo .staff-speech small {
+  font-size: .52rem;
+  color: var(--ink-soft);
+}
+.staff-cameo .staff-speech span {
+  display: block;
+  margin-top: 3px;
+  font-size: .6rem;
+  line-height: 1.35;
+}
+.staff-cameo .staff-speech em {
+  display: block;
+  margin-top: 3px;
+  font-style: normal;
+  font-family: 'Jua', sans-serif;
+  font-size: .58rem;
+  color: var(--peach-deep);
+}
+
+/* 떠오르는 골드 텍스트 */
+.float-txt {
+  position: absolute;
+  font-family: 'Jua', sans-serif;
+  font-size: .95rem;
+  color: var(--gold-deep);
+  text-shadow: 0 1px 0 #fff;
+  pointer-events: none;
+  animation: floatUp 1s ease-out forwards;
+  z-index: 9;
+  white-space: nowrap;
+}
+.float-txt.rep { color: var(--mint-dark); font-size: .8rem; }
+.float-txt.big { font-size: 1.3rem; color: var(--peach-deep); }
+@keyframes floatUp {
+  0%   { transform: translateY(0) scale(.7); opacity: 0; }
+  15%  { transform: translateY(-8px) scale(1.1); opacity: 1; }
+  100% { transform: translateY(-52px) scale(1); opacity: 0; }
+}
+
+/* 이벤트 알림 배너 */
+#eventBanner {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-60px);
+  background: linear-gradient(135deg, var(--peach), var(--rose));
+  color: #fff;
+  font-family: 'Jua', sans-serif;
+  font-size: .85rem;
+  padding: 8px 18px;
+  border-radius: 30px;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 12px rgba(244,146,106,.5);
+  cursor: pointer;
+  z-index: 8;
+  transition: transform .45s cubic-bezier(.34,1.56,.64,1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#eventBanner.show { transform: translateX(-50%) translateY(0); }
+#eventBanner { max-width: 88%; text-align: center; line-height: 1.3; }
+#eventBanner .blink { animation: pulse .9s infinite; }
+#eventBanner .event-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+#eventBanner .event-copy b {
+  font-size: .82rem;
+  line-height: 1.05;
+}
+#eventBanner .event-copy small {
+  max-width: 210px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: .58rem;
+  color: rgba(255,255,255,.9);
+}
+
+/* 회귀 버튼 */
+#auroraBtn {
+  position: absolute;
+  top: 8px; right: 8px;
+  z-index: 7;
+  background: linear-gradient(135deg, #9d7bff, #6ec6e8);
+  border: 2px solid #fff;
+  color: #fff;
+  font-family: 'Jua', sans-serif;
+  font-size: .68rem;
+  padding: 6px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(125,92,196,.4);
+  display: none;
+  animation: pulse 2s infinite;
+}
+#auroraBtn.show { display: block; }
+
+/* ---------- 하단 패널 ---------- */
+#panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 12px 8px;
+  background: var(--cream);
+  scrollbar-width: thin;
+}
+.panel-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  color: var(--mint-dark);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.panel-title small {
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: .62rem;
+  color: var(--ink-soft);
+  font-weight: normal;
+}
+
+/* 카드 공통 */
+.item-card {
+  background: var(--paper);
+  border: 2px solid #ecdcc0;
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: var(--shadow);
+}
+.item-card.locked { opacity: .55; filter: grayscale(.6); }
+.item-card .big-ico {
+  font-size: 1.7rem;
+  width: 44px; height: 44px;
+  background: var(--cream-deep);
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.item-card .info { flex: 1; min-width: 0; }
+.item-card .info .nm {
+  font-family: 'Jua', sans-serif;
+  font-size: .9rem;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.item-card .info .nm .lv { font-size: .65rem; color: var(--peach-deep); }
+.item-card .info .nm .role { font-size: .6rem; color: var(--ink-soft); font-family: 'Gowun Dodum'; }
+.item-card .info .ds { font-size: .64rem; color: var(--ink-soft); line-height: 1.35; margin-top: 2px; }
+.item-card .info .ef { font-size: .66rem; color: var(--mint-dark); margin-top: 2px; }
+
+.buy-btn {
+  flex-shrink: 0;
+  font-family: 'Jua', sans-serif;
+  font-size: .72rem;
+  background: linear-gradient(180deg, var(--gold), var(--gold-deep));
+  border: none;
+  color: #6b4d00;
+  padding: 8px 12px;
+  border-radius: 13px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #c78f12;
+  transition: transform .1s, box-shadow .1s;
+  min-width: 64px;
+  text-align: center;
+  line-height: 1.25;
+}
+.buy-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #c78f12; }
+.buy-btn:disabled {
+  background: #e8e0d2;
+  color: #b3a892;
+  box-shadow: 0 3px 0 #cfc5b0;
+  cursor: default;
+}
+.buy-btn.skill-psy { background: linear-gradient(180deg, #cdb6ff, var(--psy)); color: #4a2d8f; box-shadow: 0 3px 0 #8f6ad8; }
+.buy-btn.skill-rel { background: linear-gradient(180deg, #ffc2cb, var(--rose)); color: #8f2d3f; box-shadow: 0 3px 0 #d8707f; }
+.buy-btn.skill-tech { background: linear-gradient(180deg, #aadcf2, var(--tech)); color: #1f5c78; box-shadow: 0 3px 0 #4d9cc0; }
+
+/* 성장 수치 보유량 */
+#statBar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.stat-chip {
+  flex: 1;
+  border-radius: 13px;
+  padding: 6px 4px;
+  text-align: center;
+  font-size: .62rem;
+  color: #fff;
+  font-family: 'Jua', sans-serif;
+}
+.stat-chip .n { font-size: 1rem; display: block; }
+.stat-chip.psy { background: var(--psy); }
+.stat-chip.rel { background: var(--rose); }
+.stat-chip.tech { background: var(--tech); }
+
+/* 도감 그리드 */
+#cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.rx-card {
+  background: var(--paper);
+  border: 2px dashed #d8c5a0;
+  border-radius: 12px;
+  padding: 10px 6px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform .12s;
+  position: relative;
+  overflow: hidden;
+}
+.rx-card:active { transform: scale(.95); }
+.rx-card.owned {
+  border-style: solid;
+  border-color: var(--mint-deep);
+  background: linear-gradient(180deg, #fff 60%, #eafaf5 100%);
+}
+.rx-card .ce { font-size: 1.6rem; display: block; }
+.rx-card .cn {
+  font-family: 'Jua', sans-serif;
+  font-size: .62rem;
+  margin-top: 4px;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.rx-card .cep {
+  font-size: .52rem;
+  color: var(--peach-deep);
+  margin-top: 2px;
+  display: block;
+}
+.rx-card.missing .ce { filter: grayscale(1); opacity: .35; }
+.rx-card.missing .cn { color: #c4b89f; }
+
+/* ---------- 하단 탭 네비 ---------- */
+#nav {
+  display: flex;
+  background: var(--paper);
+  border-top: 3px solid var(--mint-deep);
+  z-index: 5;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.nav-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 8px 2px 9px;
+  cursor: pointer;
+  font-family: 'Jua', sans-serif;
+  font-size: .6rem;
+  color: var(--ink-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  position: relative;
+  transition: color .15s;
+}
+.nav-btn .nico { font-size: 1.25rem; transition: transform .15s; }
+.nav-btn.active { color: var(--mint-dark); }
+.nav-btn.active .nico { transform: translateY(-2px) scale(1.15); }
+.nav-btn .dot {
+  position: absolute;
+  top: 4px; right: 22%;
+  width: 8px; height: 8px;
+  background: var(--rose);
+  border-radius: 50%;
+  display: none;
+}
+.nav-btn.noti .dot { display: block; animation: pulse 1s infinite; }
+
+/* ---------- 모달 ---------- */
+.modal-back {
+  position: absolute;
+  inset: 0;
+  background: rgba(46, 60, 55, .55);
+  backdrop-filter: blur(2px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  padding: 18px;
+}
+.modal-back.show { display: flex; }
+.modal {
+  background: var(--paper);
+  border-radius: 22px;
+  border: 3px solid var(--mint-deep);
+  width: 100%;
+  max-width: 400px;
+  max-height: 86%;
+  overflow-y: auto;
+  padding: 18px 16px;
+  animation: popIn .35s cubic-bezier(.34,1.56,.64,1);
+  position: relative;
+}
+@keyframes popIn {
+  from { transform: scale(.7) translateY(20px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* 스토리 모달 — 처방전 스타일 */
+.story-modal {
+  border-color: var(--peach-deep);
+  background:
+    linear-gradient(var(--paper), var(--paper)) padding-box;
+}
+.rx-head {
+  text-align: center;
+  border-bottom: 2px dashed #e0cba2;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+.rx-head .ep-tag {
+  display: inline-block;
+  background: var(--cream-deep);
+  color: var(--peach-deep);
+  font-size: .6rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 5px;
+}
+.rx-head h2 { font-size: 1.25rem; color: var(--ink); }
+.rx-head .rx-no { font-size: .56rem; color: var(--ink-soft); margin-top: 3px; letter-spacing: 1px; }
+
+.scene-box { min-height: 120px; margin-bottom: 12px; }
+.scene-spk {
+  font-family: 'Jua', sans-serif;
+  font-size: .78rem;
+  color: var(--mint-dark);
+  margin-bottom: 5px;
+}
+.scene-spk.narr { color: var(--ink-soft); }
+.scene-txt {
+  font-size: .82rem;
+  line-height: 1.65;
+  white-space: pre-line;
+}
+.tap-hint {
+  text-align: center;
+  font-size: .6rem;
+  color: var(--ink-soft);
+  animation: pulse 1.4s infinite;
+  margin-top: 10px;
+}
+
+.case-brief {
+  background: #fffaf0;
+  border: 2px solid #e5c997;
+  border-radius: 14px;
+  padding: 11px;
+  box-shadow: inset 0 -2px 0 rgba(74,63,53,.06);
+}
+.case-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: .58rem;
+  color: var(--ink-soft);
+}
+.case-pill {
+  font-family: 'Jua', sans-serif;
+  color: #9b5b28;
+}
+.case-trigger {
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  color: var(--ink);
+  margin-top: 7px;
+  line-height: 1.28;
+}
+.case-goal {
+  font-size: .7rem;
+  line-height: 1.48;
+  color: var(--mint-dark);
+  margin-top: 5px;
+}
+.case-clues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+.case-clues span {
+  background: var(--paper);
+  border: 1px solid #e3cfae;
+  border-radius: 9px;
+  padding: 3px 7px;
+  font-size: .58rem;
+  color: var(--ink-soft);
+}
+.case-stakes {
+  border-top: 1px dashed #e3cfae;
+  margin-top: 9px;
+  padding-top: 8px;
+  font-size: .66rem;
+  line-height: 1.45;
+  color: var(--peach-deep);
+}
+
+.choice-wrap { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.choice-btn {
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: .8rem;
+  background: var(--cream-deep);
+  border: 2px solid #e8d4a8;
+  border-radius: 14px;
+  padding: 11px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: transform .1s, border-color .15s, background .15s;
+  color: var(--ink);
+}
+.choice-btn:active { transform: scale(.97); }
+.choice-btn:hover { border-color: var(--peach-deep); background: #fff3da; }
+.choice-btn.correct { border-color: var(--mint-deep); background: #e2f7ef; }
+.choice-btn.wrong { border-color: var(--rose); background: #ffe9ec; opacity: .7; }
+
+.reward-box {
+  background: var(--cream-deep);
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+  margin-top: 10px;
+}
+.reward-box .rw-title { font-family: 'Jua', sans-serif; font-size: .85rem; color: var(--peach-deep); margin-bottom: 6px; }
+.reward-box .rw-items {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.rw-chip {
+  background: #fff;
+  border-radius: 10px;
+  padding: 4px 10px;
+  font-size: .68rem;
+  font-family: 'Jua', sans-serif;
+  border: 1.5px solid #ecd9b0;
+}
+
+.card-get {
+  margin-top: 10px;
+  text-align: center;
+  background: linear-gradient(180deg, #fff, #eafaf5);
+  border: 2px solid var(--mint-deep);
+  border-radius: 14px;
+  padding: 12px;
+  animation: popIn .5s .15s cubic-bezier(.34,1.56,.64,1) backwards;
+}
+.card-get .cg-emoji { font-size: 2.2rem; }
+.card-get .cg-name { font-family: 'Jua', sans-serif; font-size: .9rem; color: var(--mint-dark); margin-top: 4px; }
+.card-get .cg-desc { font-size: .64rem; color: var(--ink-soft); margin-top: 3px; line-height: 1.4; }
+.card-get .cg-ep {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: .6rem;
+  color: var(--peach-deep);
+  background: var(--cream-deep);
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+.modal-btn {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  font-family: 'Jua', sans-serif;
+  font-size: .9rem;
+  background: linear-gradient(180deg, var(--mint), var(--mint-deep));
+  color: #fff;
+  border: none;
+  border-radius: 15px;
+  padding: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--mint-dark);
+  transition: transform .1s, box-shadow .1s;
+}
+.modal-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--mint-dark); }
+.modal-btn.sub {
+  background: var(--cream-deep);
+  color: var(--ink-soft);
+  box-shadow: 0 4px 0 #dcc99e;
+  margin-top: 8px;
+}
+.modal-btn.aurora-go {
+  background: linear-gradient(135deg, #9d7bff, #5fc7d8);
+  box-shadow: 0 4px 0 #6a4fc0;
+}
+.modal-btn:disabled {
+  background: #e8e0d2;
+  color: #a99d87;
+  box-shadow: 0 4px 0 #cfc5b0;
+  cursor: default;
+  transform: none;
+}
+
+.promo-modal { text-align: center; }
+.promo-head { margin-bottom: 10px; }
+.promo-copy {
+  font-size: .74rem;
+  line-height: 1.55;
+  color: var(--ink);
+  background: #fffaf0;
+  border: 1.5px solid #ead6ad;
+  border-radius: 12px;
+  padding: 10px;
+}
+.promo-links {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+.promo-ep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 50px;
+  padding: 8px 3px 7px;
+  border: 2px solid #e3cfae;
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: inset 0 -2px 0 rgba(74,63,53,.08);
+}
+.promo-ep strong {
+  font-family: 'Jua', sans-serif;
+  font-size: .78rem;
+  color: var(--mint-dark);
+}
+.promo-ep span {
+  font-size: .5rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.promo-ep.main {
+  border-color: var(--mint-deep);
+  background: #eafaf5;
+}
+.promo-reward {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 13px;
+  background: var(--cream-deep);
+  border: 1.5px dashed #d9b879;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.promo-reward b {
+  font-family: 'Jua', sans-serif;
+  color: var(--peach-deep);
+  font-size: .86rem;
+}
+.promo-reward span {
+  font-size: .64rem;
+  color: var(--ink-soft);
+}
+
+/* 특수환자 모달 */
+.special-modal { border-color: var(--gold-deep); }
+.holo-frame {
+  background: linear-gradient(135deg, #eafff8, #e8f4ff);
+  border: 2px solid var(--mint);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.holo-frame::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -60%;
+  width: 40%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,.75), transparent);
+  animation: holoShine 2.6s ease-in-out infinite;
+}
+@keyframes holoShine {
+  0% { left: -60%; }
+  60%, 100% { left: 120%; }
+}
+.holo-frame .hf-tag {
+  font-size: .56rem;
+  color: var(--mint-dark);
+  letter-spacing: 2px;
+  font-family: 'Jua', sans-serif;
+}
+.holo-frame .hf-story {
+  font-size: .76rem;
+  line-height: 1.6;
+  margin-top: 6px;
+  white-space: pre-line;
+}
+.q-title {
+  font-family: 'Jua', sans-serif;
+  font-size: .9rem;
+  text-align: center;
+  margin: 10px 0 8px;
+  color: var(--ink);
+}
+.explain-box {
+  background: var(--cream-deep);
+  border-radius: 12px;
+  padding: 10px;
+  font-size: .72rem;
+  line-height: 1.55;
+  margin-top: 10px;
+  color: var(--ink);
+}
+.explain-box b { color: var(--peach-deep); }
+
+/* 토스트 */
+#toast {
+  position: absolute;
+  bottom: 86px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(74,63,53,.92);
+  color: #fff;
+  font-size: .72rem;
+  padding: 9px 18px;
+  border-radius: 24px;
+  opacity: 0;
+  transition: all .3s;
+  z-index: 30;
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* 회귀 연출 오버레이 */
+#auroraOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background: linear-gradient(180deg, #0d1b2e, #1b2c4a);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+  text-align: center;
+  color: #fff;
+  padding: 24px;
+}
+#auroraOverlay.show { display: flex; animation: fadeIn 1.2s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+#auroraOverlay .big-aurora {
+  width: 100%;
+  height: 130px;
+  background:
+    radial-gradient(ellipse 50% 100% at 25% 0%, rgba(120,255,200,.8), transparent 70%),
+    radial-gradient(ellipse 45% 100% at 55% 10%, rgba(150,160,255,.7), transparent 70%),
+    radial-gradient(ellipse 50% 100% at 80% 0%, rgba(255,150,230,.6), transparent 70%);
+  filter: blur(8px);
+  animation: auroraWave 4s ease-in-out infinite alternate;
+}
+#auroraOverlay h2 { font-size: 1.3rem; }
+#auroraOverlay p { font-size: .76rem; line-height: 1.7; opacity: .85; }
+
+/* 설정/기타 */
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 2px;
+  border-bottom: 1px dashed #e6d6b5;
+  font-size: .78rem;
+}
+.mini-btn {
+  font-family: 'Jua', sans-serif;
+  font-size: .68rem;
+  background: var(--cream-deep);
+  border: 2px solid #e3cfae;
+  color: var(--ink);
+  padding: 6px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.mini-btn.danger { color: #c0392b; border-color: #f0b6ae; background: #fdeeec; }
+
+.case-manual {
+  margin-top: 12px;
+  background: linear-gradient(135deg, #fff3da, #ffe8ee);
+  border: 2px solid var(--peach);
+  border-radius: 16px;
+  padding: 13px;
+  text-align: center;
+}
+.case-manual .cm-t { font-family: 'Jua', sans-serif; font-size: .88rem; color: var(--peach-deep); }
+.case-manual .cm-d { font-size: .66rem; color: var(--ink-soft); margin-top: 4px; line-height: 1.5; }
+
+/* 환영(오프라인) 모달 */
+.offline-emoji { text-align: center; font-size: 2.6rem; }
+
+@media (max-height: 700px) {
+  #scene { height: 264px; }
+  #shelves { display: none; }
+}

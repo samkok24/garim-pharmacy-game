@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>가림약국 키우기 — 다 해먹는 2회차 동네약사</title>
+<meta name="description" content="회귀약사 임가민이 환자를 조제하고 긴급 사건을 해결하는 캐주얼 방치형 약국 게임">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💊</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- 상단 자원 바 -->
+  <div id="topbar">
+    <div class="res gold">
+      <span class="ico">💰</span>
+      <span class="val-wrap"><span class="lbl">골드</span><span class="val" id="goldVal">0</span></span>
+    </div>
+    <div class="res rep">
+      <span class="ico">⭐</span>
+      <span class="val-wrap"><span class="lbl" id="repLbl">명성</span><span class="val" id="repVal">0</span></span>
+    </div>
+    <div class="res aurora">
+      <span class="ico">🌌</span>
+      <span class="val-wrap"><span class="lbl">오로라 조각</span><span class="val" id="shardVal">0</span></span>
+    </div>
+  </div>
+
+  <!-- 약국 씬 -->
+  <div id="scene">
+    <div id="auroraFx"></div>
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+
+    <div id="eventBanner"></div>
+    <button id="auroraBtn">🌌 회귀</button>
+
+    <div id="sign">
+      <span class="cross">✚</span><h1>가림약국</h1>
+      <div class="sub">친절 · 신속 · 정확</div>
+    </div>
+
+    <div id="shopFloor">
+      <div id="shelves">
+        <div class="shelf">💊🧴💉🩹</div>
+        <div class="shelf">🧪💊🍯🧴</div>
+        <div class="shelf">🩹🧪💊🌡️</div>
+        <div class="shelf">🧴💊🧃💊</div>
+      </div>
+      <div id="gaminBubble"></div>
+      <div id="gamin"></div>
+      <div id="brewBarWrap"><div id="brewBar"></div></div>
+      <div id="counter"></div>
+      <div id="queue"></div>
+    </div>
+  </div>
+
+  <!-- 하단 패널 -->
+  <div id="panel"></div>
+
+  <!-- 하단 네비 -->
+  <div id="nav">
+    <button class="nav-btn active" data-tab="upgrade"><span class="nico">🛠️</span>업그레이드<span class="dot"></span></button>
+    <button class="nav-btn" data-tab="staff"><span class="nico">👥</span>식구들<span class="dot"></span></button>
+    <button class="nav-btn" data-tab="growth"><span class="nico">🌱</span>성장<span class="dot"></span></button>
+    <button class="nav-btn" data-tab="cards"><span class="nico">📚</span>도감<span class="dot"></span></button>
+    <button class="nav-btn" data-tab="etc"><span class="nico">⚙️</span>일지<span class="dot"></span></button>
+  </div>
+
+  <!-- 모달들 -->
+  <div class="modal-back" id="storyBack">
+    <div class="modal story-modal" id="storyModal"></div>
+  </div>
+  <div class="modal-back" id="specialBack">
+    <div class="modal special-modal" id="specialModal"></div>
+  </div>
+  <div class="modal-back" id="genericBack">
+    <div class="modal" id="genericModal"></div>
+  </div>
+
+  <!-- 회귀 연출 -->
+  <div id="auroraOverlay">
+    <div class="big-aurora"></div>
+    <h2 class="jua">🌌 오로라가 하늘을 물들입니다…</h2>
+    <p>삐— 스르륵— 드르륵— 드르륵—<br>꺼져 있던 프린터에서 처방전이 출력됩니다.<br><br>【여기까지 왔어. 이제 어떻게 하면 되는 거지?】</p>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script src="chars.js"></script>
+<script src="data.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
